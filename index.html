@@ -198,15 +198,16 @@
 </head>
 <body class="font-sans">
 
-    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, persistent floating widget, and navigation... -->
+    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, persistent bottom-right floating widget, and navigation... -->
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
 
-    <!-- Persistent Right-Middle Floating Widget (Present on All Pages) -->
-    <a href="mailto:play@simbionfilm.com" class="fixed right-4 md:right-8 top-1/2 -translate-y-1/2 z-[105] flex flex-col items-end gap-1.5 group cursor-pointer interactive-el p-2 rounded-xl transition-all">
-        <span class="text-[9px] md:text-[10px] font-bold font-mono tracking-widest uppercase text-white drop-shadow-md">ANYTHING ON YOUR MIND?</span>
-        <div class="bg-simbionBlue text-white px-3 py-1.5 rounded-lg text-[11px] md:text-xs font-mono italic shadow-2xl group-hover:scale-105 transition-transform border border-white/20">
-            Start here
+    <!-- Persistent Bottom-Right Floating Widget (Present on All Pages) -->
+    <a href="mailto:play@simbionfilm.com" class="fixed bottom-6 right-6 md:right-8 z-[105] flex flex-col items-end gap-1 group cursor-pointer interactive-el transition-all">
+        <span class="text-[9px] md:text-[10px] font-black font-mono tracking-widest uppercase text-simbionBlue drop-shadow-sm">ANYTHING ON YOUR MIND?</span>
+        <div class="bg-white text-black px-3.5 py-2 rounded-2xl text-[11px] md:text-xs font-mono font-bold shadow-2xl group-hover:scale-105 transition-transform flex items-center gap-1.5 border border-neutral-200">
+            <span>Drop a message</span>
+            <svg class="w-3 h-3 transform -rotate-45 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
         </div>
     </a>
 
@@ -1027,4 +1028,5 @@
     </script>
 </body>
 </html>
+
 ```eof

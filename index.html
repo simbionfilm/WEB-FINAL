@@ -88,21 +88,27 @@
         .slot-char {
             display: inline-block;
             transform: translateY(120%);
+            -webkit-transform: translateY(120%);
         }
         .slot-char.static {
             transform: translateY(0%);
+            -webkit-transform: translateY(0%);
         }
 
-        /* Hover Text Smooth Italic, Move & Blue Color Effects (Desktop Only) */
+        /* Hover Text Smooth Italic, Move & Blue Color Effects (Desktop Only) with Safari Support */
         .hover-text-fx {
             display: inline-block;
             transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), font-variation-settings 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s ease-out;
+            -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), font-variation-settings 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s ease-out;
             font-variation-settings: "slnt" 0;
             will-change: transform, font-variation-settings, color;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
         @media (hover: hover) {
             .hover-text-fx:hover {
                 transform: translateX(16px) skewX(-6deg);
+                -webkit-transform: translateX(16px) skewX(-6deg);
                 font-variation-settings: "slnt" -16;
                 color: #0616C6 !important; 
             }
@@ -117,7 +123,9 @@
             filter: blur(10px);
             opacity: 0.35;
             transition: filter 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, color 0.4s ease;
+            -webkit-transition: -webkit-filter 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), -webkit-transform 0.4s ease, color 0.4s ease;
             will-change: filter, opacity, transform;
+            -webkit-backface-visibility: hidden;
         }
         @media (hover: hover) {
             .we-are-container:hover .we-are-word {
@@ -128,12 +136,14 @@
                 filter: blur(0px) !important;
                 opacity: 1 !important;
                 transform: translateX(12px) skewX(-4deg) scale(1.02);
+                -webkit-transform: translateX(12px) skewX(-4deg) scale(1.02);
                 color: #0616C6 !important;
             }
         }
         .we-are-word-wrap {
             display: inline-block;
             will-change: transform;
+            -webkit-backface-visibility: hidden;
         }
 
         /* About Us Line Hover Style */
@@ -141,13 +151,16 @@
             display: inline-block;
             width: fit-content;
             transition: font-variation-settings 0.2s ease-out, transform 0.2s ease-out, color 0.2s ease-out;
+            -webkit-transition: font-variation-settings 0.2s ease-out, -webkit-transform 0.2s ease-out, color 0.2s ease-out;
             font-variation-settings: "slnt" 0;
             cursor: pointer;
+            -webkit-backface-visibility: hidden;
         }
         @media (hover: hover) {
             .about-line:hover {
                 font-variation-settings: "slnt" -12;
                 transform: translateX(8px);
+                -webkit-transform: translateX(8px);
                 color: #0616C6 !important;
             }
         }
@@ -724,6 +737,7 @@
                 inner.textContent = char;
                 if (!willRoll) {
                     inner.style.transform = 'translateY(0%)';
+                    inner.style.webkitTransform = 'translateY(0%)';
                 }
                 
                 wrapper.appendChild(inner);

@@ -46,6 +46,16 @@
             cursor: none;
         }
 
+        /* Disable custom cursor and restore standard cursor on mobile/touch devices */
+        @media (pointer: coarse), (max-width: 768px) {
+            body {
+                cursor: auto !important;
+            }
+            .custom-cursor {
+                display: none !important;
+            }
+        }
+
         ::selection {
             background-color: #0616C6;
             color: white;
@@ -83,17 +93,19 @@
             transform: translateY(0%);
         }
 
-        /* Hover Text Smooth Italic & Move Effects */
+        /* Hover Text Smooth Italic, Move & Blue Color Effects (Desktop Only) */
         .hover-text-fx {
             display: inline-block;
-            transition: transform 0.2s ease-out, font-variation-settings 0.2s ease-out, color 0.2s ease-out;
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), font-variation-settings 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s ease-out;
             font-variation-settings: "slnt" 0;
-            will-change: transform, font-variation-settings;
+            will-change: transform, font-variation-settings, color;
         }
-        .hover-text-fx:hover {
-            transform: translateX(16px) skewX(-4deg);
-            font-variation-settings: "slnt" -16;
-            color: #ffffff;
+        @media (hover: hover) {
+            .hover-text-fx:hover {
+                transform: translateX(16px) skewX(-6deg);
+                font-variation-settings: "slnt" -16;
+                color: #0616C6 !important; 
+            }
         }
 
         /* Cinematic Lens Focus Blur Effect Per Word */
@@ -107,15 +119,17 @@
             transition: filter 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, color 0.4s ease;
             will-change: filter, opacity, transform;
         }
-        .we-are-container:hover .we-are-word {
-            filter: blur(8px);
-            opacity: 0.4;
-        }
-        .we-are-container .we-are-word:hover {
-            filter: blur(0px) !important;
-            opacity: 1 !important;
-            transform: translateX(12px) skewX(-4deg) scale(1.02);
-            color: #ffffff;
+        @media (hover: hover) {
+            .we-are-container:hover .we-are-word {
+                filter: blur(8px);
+                opacity: 0.4;
+            }
+            .we-are-container .we-are-word:hover {
+                filter: blur(0px) !important;
+                opacity: 1 !important;
+                transform: translateX(12px) skewX(-4deg) scale(1.02);
+                color: #0616C6 !important;
+            }
         }
         .we-are-word-wrap {
             display: inline-block;
@@ -126,13 +140,16 @@
         .about-line {
             display: inline-block;
             width: fit-content;
-            transition: font-variation-settings 0.2s ease-out, transform 0.2s ease-out;
+            transition: font-variation-settings 0.2s ease-out, transform 0.2s ease-out, color 0.2s ease-out;
             font-variation-settings: "slnt" 0;
             cursor: pointer;
         }
-        .about-line:hover {
-            font-variation-settings: "slnt" -12;
-            transform: translateX(8px);
+        @media (hover: hover) {
+            .about-line:hover {
+                font-variation-settings: "slnt" -12;
+                transform: translateX(8px);
+                color: #0616C6 !important;
+            }
         }
 
         ::-webkit-scrollbar { display: none; }
@@ -349,10 +366,10 @@
         <div class="relative z-10 flex flex-col items-center text-center w-full my-auto">
             <div class="flex flex-col w-full font-display font-bold leading-[0.9] tracking-tighter">
                 <div class="clip-mask w-full flex justify-center">
-                    <span class="contact-title-line block uppercase text-[10vw] md:text-[8vw] text-white interactive-el hover-text-fx transition-colors duration-300">READY TO</span>
+                    <span class="contact-title-line block uppercase text-[10vw] md:text-[8vw] text-white interactive-el hover-text-fx transition-colors">READY TO</span>
                 </div>
                 <div class="clip-mask w-full flex justify-center">
-                    <span class="contact-title-line block uppercase text-[10vw] md:text-[8vw] text-white interactive-el hover-text-fx transition-colors duration-300">ROLL?</span>
+                    <span class="contact-title-line block uppercase text-[10vw] md:text-[8vw] text-white interactive-el hover-text-fx transition-colors">ROLL?</span>
                 </div>
             </div>
             
@@ -363,31 +380,33 @@
 
         <div class="w-full px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 z-10 font-sans text-[10px] tracking-widest text-mutedText">
             <div class="flex gap-8">
-                <a href="mailto:play@simbionfilm.com" class="interactive-el hover-text-fx uppercase">play@simbionfilm.com</a>
+                <a href="mailto:play@simbionfilm.com" class="interactive-el hover-text-fx uppercase text-white">play@simbionfilm.com</a>
             </div>
             <div class="flex gap-8">
-                <a href="https://www.instagram.com/ssimbionn/" target="_blank" rel="noopener noreferrer" class="interactive-el hover-text-fx uppercase">INSTAGRAM</a>
-                <a href="#" target="_blank" rel="noopener noreferrer" class="interactive-el hover-text-fx uppercase">LINKEDIN</a>
+                <a href="https://www.instagram.com/ssimbionn/" target="_blank" rel="noopener noreferrer" class="interactive-el hover-text-fx uppercase text-white">INSTAGRAM</a>
+                <a href="#" target="_blank" rel="noopener noreferrer" class="interactive-el hover-text-fx uppercase text-white">LINKEDIN</a>
             </div>
-            <div class="hover-text-fx uppercase">&copy; 2026 Simbion Film</div>
+            <div class="hover-text-fx uppercase text-white">&copy; 2026 Simbion Film</div>
         </div>
     </section>
 
     <!-- Script Execution -->
     <!-- STREAMING_CHUNK:Attaching password-protected CMS editor engine with customizable secret keyword and password... -->
     <script>
-        // Custom Horizontal Oval Cursor Tracker
+        // Custom Horizontal Oval Cursor Tracker (Skipped on touch devices via CSS, tracked on desktop)
         const cursor = document.getElementById('custom-cursor');
         window.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
+            if (cursor && window.matchMedia("(pointer: fine)").matches) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            }
         });
 
         // ==========================================
         // 🔐 CONFIGURABLE SECRET KEYWORD & PASSWORD
         // ==========================================
-        const SECRET_KEYWORD = "fundamental"; // <-- Type this word anywhere on your keyboard to open password prompt!
-        const ADMIN_PASSWORD = "simbiosismutualisme"; // <-- Password required inside the popup modal!
+        const SECRET_KEYWORD = "fundamental"; 
+        const ADMIN_PASSWORD = "simbiosismutualisme"; 
         // ==========================================
 
         // Default CMS Data
@@ -438,7 +457,8 @@
                         <div class="absolute inset-1 rounded-full border border-neutral-800 pointer-events-none"></div>
                         <div class="absolute inset-3 rounded-full border border-neutral-800 pointer-events-none"></div>
                         <div class="w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden border border-white/20 relative z-10">
-                            <img src="https://img.youtube.com/vi/${rr.videoId}/maxresdefault.jpg" alt="${rr.title}" class="w-full h-full object-cover">
+                            <!-- Added fallback image to prevent broken icon -->
+                            <img src="https://img.youtube.com/vi/${rr.videoId}/maxresdefault.jpg" onerror="this.src='https://placehold.co/400x400/111111/FFFFFF?text=NEW'" alt="${rr.title}" class="w-full h-full object-cover">
                         </div>
                         <div class="absolute w-2 h-2 bg-black rounded-full z-20"></div>
                     </div>

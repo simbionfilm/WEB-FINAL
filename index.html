@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMBION FILM | BLUE WORLD</title>
+    <title>SIMBION FILM</title>
     
     <!-- Browser Tab Favicon using orang.png -->
     <link rel="icon" type="image/png" href="orang.png">
@@ -143,24 +143,18 @@
             -webkit-backface-visibility: hidden;
         }
 
-        /* About Us Line Hover Style */
+        /* About Us Line Hover Style with Safari GPU Acceleration */
         .about-line {
             display: inline-block;
             width: fit-content;
-            transition: font-variation-settings 0.2s ease-out, transform 0.2s ease-out, color 0.2s ease-out;
-            -webkit-transition: font-variation-settings 0.2s ease-out, -webkit-transform 0.2s ease-out, color 0.2s ease-out;
             font-variation-settings: "slnt" 0;
             -webkit-font-smoothing: antialiased;
             cursor: none !important;
             -webkit-backface-visibility: hidden;
-        }
-        @media (hover: hover) {
-            .about-line:hover {
-                font-variation-settings: "slnt" -12;
-                transform: translateX(8px);
-                -webkit-transform: translateX(8px);
-                color: #0616C6 !important;
-            }
+            backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            will-change: transform, font-variation-settings, color;
         }
 
         ::-webkit-scrollbar { display: none; }
@@ -953,7 +947,7 @@
                 { y: "110%", filter: "blur(10px)", scale: 1.2 },
                 {
                     scrollTrigger: { trigger: "#contact", start: "top 75%" },
-                    y: "0%", filter: "blur(0px)", scale: "1", duration: 1.5, ease: "power4.out", stagger: 0.1
+                    y: "0%", filter: "blur(0px)", scale: 1, duration: 1.5, ease: "power4.out", stagger: 0.1
                 }
             );
         });
@@ -984,6 +978,32 @@
                         fontVariationSettings: '"slnt" 0',
                         color: '#FFFFFF',
                         duration: 0.3,
+                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                });
+            });
+        }
+
+        // Bulletproof Safari Hover Engine for .about-line using GSAP
+        if (window.matchMedia("(hover: hover)").matches) {
+            document.querySelectorAll('.about-line').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    gsap.to(el, {
+                        x: 8,
+                        fontVariationSettings: '"slnt" -12',
+                        color: '#0616C6',
+                        duration: 0.2,
+                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                });
+                el.addEventListener('mouseleave', () => {
+                    gsap.to(el, {
+                        x: 0,
+                        fontVariationSettings: '"slnt" 0',
+                        color: '#FFFFFF',
+                        duration: 0.2,
                         ease: "power2.out",
                         overwrite: "auto"
                     });

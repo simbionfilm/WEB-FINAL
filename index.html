@@ -198,9 +198,17 @@
 </head>
 <body class="font-sans">
 
-    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, customizable secret keyword trigger, and navigation... -->
+    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, persistent floating widget, and navigation... -->
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
+
+    <!-- Persistent Right-Middle Floating Widget (Present on All Pages) -->
+    <a href="mailto:play@simbionfilm.com" class="fixed right-4 md:right-8 top-1/2 -translate-y-1/2 z-[105] flex flex-col items-end gap-1.5 group cursor-pointer interactive-el p-2 rounded-xl transition-all">
+        <span class="text-[9px] md:text-[10px] font-bold font-mono tracking-widest uppercase text-white drop-shadow-md">ANYTHING ON YOUR MIND?</span>
+        <div class="bg-simbionBlue text-white px-3 py-1.5 rounded-lg text-[11px] md:text-xs font-mono italic shadow-2xl group-hover:scale-105 transition-transform border border-white/20">
+            Start here
+        </div>
+    </a>
 
     <!-- Password Prompt Modal -->
     <div id="password-modal" class="fixed inset-0 z-[300] bg-black/90 backdrop-blur-2xl flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 p-4 overflow-y-auto">
@@ -375,7 +383,7 @@
     </section>
 
     <!-- SECTION: CONTACT -->
-    <!-- STREAMING_CHUNK:Rendering Contact section with compact bottom-right responsive "Anything on your mind?" widget... -->
+    <!-- STREAMING_CHUNK:Rendering Contact section with Ready to Roll and restored quote underneath... -->
     <section id="contact" class="relative w-full h-[100dvh] bg-black flex flex-col justify-between px-4 md:px-8 py-16 z-50 shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
         
         <div class="relative z-10 flex flex-col items-center text-center w-full my-auto">
@@ -387,14 +395,10 @@
                     <span class="contact-title-line block uppercase text-[10vw] md:text-[8vw] text-white interactive-el hover-text-fx transition-colors">ROLL?</span>
                 </div>
             </div>
-        </div>
-
-        <!-- Compact Responsive Bottom-Right Widget ("Anything on your mind?") -->
-        <div class="absolute bottom-24 right-6 md:right-12 z-20 flex flex-col items-end text-right reveal-quote opacity-0 transform translate-y-4">
-            <span class="text-[10px] md:text-xs font-mono text-mutedText uppercase tracking-widest mb-1">Anything on your mind?</span>
-            <a href="mailto:play@simbionfilm.com" class="text-xs md:text-sm font-bold text-white hover:text-simbionBlue underline tracking-wider uppercase interactive-el transition-colors">
-                Start here &rarr;
-            </a>
+            
+            <p class="text-[10px] md:text-xs tracking-widest font-sans text-white opacity-0 transform translate-y-4 reveal-quote mt-8 interactive-el hover-text-fx">
+                ( Guess we’ll see you at the first PPM )
+            </p>
         </div>
 
         <div class="w-full px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 z-10 font-sans text-[10px] tracking-widest text-mutedText">
@@ -410,7 +414,7 @@
     </section>
 
     <!-- Script Execution -->
-    <!-- STREAMING_CHUNK:Attaching password-protected CMS editor engine with clean top-right blue vinyl and bottom-right prompt... -->
+    <!-- STREAMING_CHUNK:Attaching password-protected CMS editor engine and persistent floating widget renderer... -->
     <script>
         // Custom Horizontal Oval Cursor Tracker (Skipped on touch devices via CSS, tracked on desktop)
         const cursor = document.getElementById('custom-cursor');

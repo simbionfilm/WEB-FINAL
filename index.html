@@ -164,14 +164,9 @@
 </head>
 <body class="font-sans">
 
-    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, scrollable admin panel, and navigation... -->
+    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, customizable secret keyword trigger, and navigation... -->
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
-
-    <!-- Floating Admin CMS Toggle Prompt -->
-    <button id="toggle-cms" class="fixed bottom-6 left-6 z-[150] bg-white/10 hover:bg-white/25 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] font-mono tracking-widest uppercase transition-all shadow-2xl">
-        ⚙️ EDIT CONTENT [PRESS 'E']
-    </button>
 
     <!-- Password Prompt Modal -->
     <div id="password-modal" class="fixed inset-0 z-[300] bg-black/90 backdrop-blur-2xl flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 p-4 overflow-y-auto">
@@ -188,7 +183,7 @@
         </div>
     </div>
 
-    <!-- CMS Admin Modal Drawer (Fixed Scrollable Layout) -->
+    <!-- CMS Admin Modal Drawer (Scrollable Layout) -->
     <div id="cms-modal" class="fixed inset-0 z-[250] bg-black/90 backdrop-blur-2xl flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 p-4 md:p-8 overflow-y-auto">
         <div class="bg-neutral-900 border border-white/20 rounded-3xl w-full max-w-4xl p-6 md:p-8 text-white relative shadow-2xl my-auto">
             <div class="flex justify-between items-center pb-6 border-b border-white/10 mb-6">
@@ -379,7 +374,7 @@
     </section>
 
     <!-- Script Execution -->
-    <!-- STREAMING_CHUNK:Attaching password-protected CMS editor engine and modal interactions... -->
+    <!-- STREAMING_CHUNK:Attaching password-protected CMS editor engine with customizable secret keyword and password... -->
     <script>
         // Custom Horizontal Oval Cursor Tracker
         const cursor = document.getElementById('custom-cursor');
@@ -387,6 +382,13 @@
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
         });
+
+        // ==========================================
+        // 🔐 CONFIGURABLE SECRET KEYWORD & PASSWORD
+        // ==========================================
+        const SECRET_KEYWORD = "fundamental"; // <-- Type this word anywhere on your keyboard to open password prompt!
+        const ADMIN_PASSWORD = "simbiosismutualisme"; // <-- Password required inside the popup modal!
+        // ==========================================
 
         // Default CMS Data
         const defaultCMS = {
@@ -421,7 +423,7 @@
         // Load data from localStorage or use defaults
         let cmsData = JSON.parse(localStorage.getItem('simbion_cms')) || defaultCMS;
 
-        // Render New Release Widget (Stroke box removed)
+        // Render New Release Widget
         function renderRecentRelease() {
             const container = document.getElementById('recent-release-container');
             const rr = cmsData.recentRelease;
@@ -519,20 +521,37 @@
             if (e.target === videoModal) closeVideoModal();
         });
 
-        // Password & CMS Modal Logic
+        // Secret Keyboard Listener & CMS Logic
         const passwordModal = document.getElementById('password-modal');
         const passwordForm = document.getElementById('password-form');
         const adminPasswordInput = document.getElementById('admin-password');
         const closePasswordBtn = document.getElementById('close-password');
         
         const cmsModal = document.getElementById('cms-modal');
-        const toggleCmsBtn = document.getElementById('toggle-cms');
         const closeCmsBtn = document.getElementById('close-cms');
         const saveCmsBtn = document.getElementById('cms-save');
         const resetCmsBtn = document.getElementById('cms-reset');
         const addItemBtn = document.getElementById('cms-add-item');
 
-        const ADMIN_PASSWORD = "simbiosismutualisme2026"; // <-- You can change this password here!
+        let typedBuffer = "";
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeVideoModal();
+                closeCmsModal();
+                closePasswordModal();
+            }
+
+            // Type the secret keyword anywhere on the page
+            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                typedBuffer += e.key.toLowerCase();
+                if (typedBuffer.length > 20) typedBuffer = typedBuffer.slice(-20);
+                if (typedBuffer.includes(SECRET_KEYWORD.toLowerCase())) {
+                    typedBuffer = "";
+                    requestPasswordPrompt();
+                }
+            }
+        });
 
         function requestPasswordPrompt() {
             adminPasswordInput.value = '';
@@ -546,7 +565,6 @@
             document.body.style.overflow = '';
         }
 
-        toggleCmsBtn.addEventListener('click', requestPasswordPrompt);
         closePasswordBtn.addEventListener('click', closePasswordModal);
 
         passwordForm.addEventListener('submit', (e) => {
@@ -557,17 +575,6 @@
             } else {
                 alert('Incorrect Password!');
                 adminPasswordInput.value = '';
-            }
-        });
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeVideoModal();
-                closeCmsModal();
-                closePasswordModal();
-            }
-            if (e.key.toLowerCase() === 'e' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-                requestPasswordPrompt();
             }
         });
 
@@ -623,7 +630,6 @@
         addItemBtn.addEventListener('click', () => {
             cmsData.works.push({ title: "NEW WORK", artist: "ARTIST", year: "2026", videoId: "7KA1LaIy804", row: 1 });
             renderCmsWorksList();
-            // Scroll container down to new item
             const container = document.getElementById('cms-items-container');
             container.scrollTop = container.scrollHeight;
         });
@@ -898,7 +904,7 @@
                 });
                 item.addEventListener('mouseleave', () => {
                     gsap.to(inner, { 
-                        scale: 1, duration: 0.8, ease: "power3.0", overwrite: "auto",
+                        scale: 1, duration: 0.8, ease: "power3.out", overwrite: "auto",
                         onComplete: () => gsap.set(item, { zIndex: 10 }) 
                     });
                     galleryItems.forEach((other) => {

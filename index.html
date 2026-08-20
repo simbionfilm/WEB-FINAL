@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMBION FILM</title>
+    <title>SIMBION FILM | BLUE WORLD</title>
     
     <!-- Browser Tab Favicon using orang.png -->
     <link rel="icon" type="image/png" href="orang.png">
@@ -37,7 +37,7 @@
         .lenis.lenis-stopped { overflow: hidden; }
         .lenis.lenis-scrolling iframe { pointer-events: none; }
         
-        body {
+        body, a, button, input, select, textarea, .interactive-el, .gallery-item, .video-trigger {
             font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: #000000;
             color: #FFFFFF;
@@ -45,12 +45,12 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
-            cursor: none;
+            cursor: none !important;
         }
 
         /* Disable custom cursor and restore standard cursor on mobile/touch devices */
         @media (pointer: coarse), (max-width: 768px) {
-            body {
+            body, a, button, input, select, textarea, .interactive-el, .gallery-item, .video-trigger {
                 cursor: auto !important;
             }
             .custom-cursor {
@@ -97,7 +97,7 @@
             -webkit-transform: translateY(0%);
         }
 
-        /* Hover Text Smooth Italic, Move & Blue Color Effects (Desktop Only) with Safari Support */
+        /* Hover Text Smooth Italic, Move & Blue Color Effects with Full Safari / Webkit Support */
         .hover-text-fx {
             display: inline-block;
             transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), font-variation-settings 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s ease-out;
@@ -107,11 +107,13 @@
             will-change: transform, font-variation-settings, color;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
         }
         @media (hover: hover) {
             .hover-text-fx:hover {
-                transform: translateX(16px) skewX(-6deg);
-                -webkit-transform: translateX(16px) skewX(-6deg);
+                transform: translateX(16px) skewX(-6deg) translateZ(0);
+                -webkit-transform: translateX(16px) skewX(-6deg) translateZ(0);
                 font-variation-settings: "slnt" -16;
                 color: #0616C6 !important; 
             }
@@ -119,7 +121,7 @@
 
         /* Cinematic Lens Focus Blur Effect Per Word */
         .we-are-container {
-            cursor: pointer;
+            cursor: none !important;
         }
         .we-are-word {
             display: inline-block;
@@ -158,7 +160,7 @@
             -webkit-transition: font-variation-settings 0.2s ease-out, -webkit-transform 0.2s ease-out, color 0.2s ease-out;
             font-variation-settings: "slnt" 0;
             -webkit-font-smoothing: antialiased;
-            cursor: pointer;
+            cursor: none !important;
             -webkit-backface-visibility: hidden;
         }
         @media (hover: hover) {
@@ -179,6 +181,7 @@
             transition: z-index 0.3s;
             z-index: 10;
             will-change: transform;
+            cursor: none !important;
         }
         
         /* Film Track Container Layout */

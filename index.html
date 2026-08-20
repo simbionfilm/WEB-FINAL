@@ -100,8 +100,7 @@
         /* Hover Text Smooth Italic, Move & Blue Color Effects with Full Safari / Webkit Support */
         .hover-text-fx {
             display: inline-block;
-            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), font-variation-settings 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s ease-out;
-            -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), font-variation-settings 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s ease-out;
+            position: relative;
             font-variation-settings: "slnt" 0;
             -webkit-font-smoothing: antialiased;
             will-change: transform, font-variation-settings, color;
@@ -109,14 +108,6 @@
             backface-visibility: hidden;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
-        }
-        @media (hover: hover) {
-            .hover-text-fx:hover {
-                transform: translateX(16px) skewX(-6deg) translateZ(0);
-                -webkit-transform: translateX(16px) skewX(-6deg) translateZ(0);
-                font-variation-settings: "slnt" -16;
-                color: #0616C6 !important; 
-            }
         }
 
         /* Cinematic Lens Focus Blur Effect Per Word */
@@ -478,7 +469,6 @@
                         <div class="absolute inset-1 rounded-full border border-neutral-800 pointer-events-none"></div>
                         <div class="absolute inset-3 rounded-full border border-neutral-800 pointer-events-none"></div>
                         <div class="w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden border border-white/20 relative z-10">
-                            <!-- Added fallback image to prevent broken icon -->
                             <img src="https://img.youtube.com/vi/${rr.videoId}/maxresdefault.jpg" onerror="this.src='https://placehold.co/400x400/111111/FFFFFF?text=NEW'" alt="${rr.title}" class="w-full h-full object-cover">
                         </div>
                         <div class="absolute w-2 h-2 bg-black rounded-full z-20"></div>
@@ -584,7 +574,6 @@
                 closePasswordModal();
             }
 
-            // Type the secret keyword anywhere on the page
             if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
                 typedBuffer += e.key.toLowerCase();
                 if (typedBuffer.length > 20) typedBuffer = typedBuffer.slice(-20);
@@ -964,7 +953,7 @@
                 { y: "110%", filter: "blur(10px)", scale: 1.2 },
                 {
                     scrollTrigger: { trigger: "#contact", start: "top 75%" },
-                    y: "0%", filter: "blur(0px)", scale: 1, duration: 1.5, ease: "power4.out", stagger: 0.1
+                    y: "0%", filter: "blur(0px)", scale: "1", duration: 1.5, ease: "power4.out", stagger: 0.1
                 }
             );
         });
@@ -973,6 +962,34 @@
             scrollTrigger: { trigger: '.reveal-quote', start: "top 90%" },
             y: 0, opacity: 1, duration: 1.5, ease: "expo.out"
         });
+
+        // Bulletproof Safari Hover Engine for .hover-text-fx using GSAP
+        if (window.matchMedia("(hover: hover)").matches) {
+            document.querySelectorAll('.hover-text-fx').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    gsap.to(el, {
+                        x: 16,
+                        skewX: -6,
+                        fontVariationSettings: '"slnt" -16',
+                        color: '#0616C6',
+                        duration: 0.3,
+                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                });
+                el.addEventListener('mouseleave', () => {
+                    gsap.to(el, {
+                        x: 0,
+                        skewX: 0,
+                        fontVariationSettings: '"slnt" 0',
+                        color: '#FFFFFF',
+                        duration: 0.3,
+                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                });
+            });
+        }
     </script>
 </body>
 </html>

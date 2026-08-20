@@ -164,13 +164,20 @@
         ::-webkit-scrollbar { display: none; }
         .clip-mask { overflow: hidden; display: block; padding: 0.1em 0; }
 
-        /* Gallery Z-Index Fix */
+        /* Gallery Z-Index Fix & Cross-Browser Dynamic Width Rule */
         .gallery-item {
             position: absolute;
             transition: z-index 0.3s;
             z-index: 10;
             will-change: transform;
             cursor: none !important;
+            width: 42vw;
+            aspect-ratio: 16 / 9;
+        }
+        @media (min-width: 768px) {
+            .gallery-item {
+                width: 15vw;
+            }
         }
         
         /* Film Track Container Layout */
@@ -475,7 +482,7 @@
             `;
         }
 
-        // Render Selected Works Track
+        // Render Selected Works Track with Cross-Browser Robust Inline Positioning
         function renderSelectedWorks() {
             const track = document.getElementById('film-track');
             let html = '';
@@ -489,7 +496,7 @@
                 items.forEach((item, idx) => {
                     const leftPos = 110 + (idx * 18);
                     subHtml += `
-                        <div class="gallery-item absolute left-[${leftPos}vw] top-[${topPercent}%] w-[42vw] md:w-[15vw] aspect-video">
+                        <div class="gallery-item cms-gallery-item" style="left: ${leftPos}vw; top: ${topPercent}%;">
                             <div class="parallax-wrap w-full h-full" data-mx="${(idx % 2 === 0 ? -2 : 3)}" data-my="${(idx % 3 === 0 ? 3 : -3)}">
                                 <div class="idle-float w-full h-full">
                                     <div class="gallery-item-inner block relative w-full h-full overflow-hidden shadow-xl group cursor-pointer bg-black video-trigger" data-video-id="${item.videoId}">
@@ -759,31 +766,24 @@
             scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.1 }
         });
 
-        // Animation: We Are What We've Made Floating Animation for Wrapper
+        // Animation: We Are What We've Made Stable Entrance Animation (No Scrub Conflict)
         const weAreWordWraps = document.querySelectorAll('.we-are-word-wrap');
         weAreWordWraps.forEach((wrap, index) => {
             gsap.fromTo(wrap, 
-                { y: "110%" },
+                { y: "110%", opacity: 0 },
                 {
                     scrollTrigger: {
                         trigger: "#we-are-made",
                         start: "top 75%",
-                        end: "top 25%",
-                        scrub: 1
+                        toggleActions: "play none none reverse"
                     },
-                    y: "0%"
+                    y: "0%",
+                    opacity: 1,
+                    duration: 1.2,
+                    ease: "power3.out",
+                    delay: index * 0.08
                 }
             );
-
-            gsap.to(wrap, {
-                y: index % 2 === 0 ? "+=10" : "-=10",
-                rotation: index % 2 === 0 ? -1.5 : 1.5,
-                duration: 3.5 + index * 0.5,
-                yoyo: true,
-                repeat: -1,
-                ease: "sine.inOut",
-                delay: index * 0.2
-            });
         });
 
         // Animation: Clean Horizontal Scroll Engine with Direction-Responsive Roll Shift

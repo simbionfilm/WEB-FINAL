@@ -101,7 +101,7 @@
             -webkit-transform: translateY(0%);
         }
 
-        /* Hover Text Smooth Italic, Move & Blue Color Effects with Full Safari / Webkit Support */
+        /* Hover Text Instant Color & Move Effects with Full Safari / Webkit Support */
         .hover-text-fx {
             display: inline-block;
             position: relative;
@@ -122,8 +122,8 @@
             display: inline-block;
             filter: blur(10px);
             opacity: 0.35;
-            transition: filter 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease, color 0.4s ease;
-            -webkit-transition: -webkit-filter 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), -webkit-transform 0.4s ease, color 0.4s ease;
+            transition: filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease, color 0.3s ease;
+            -webkit-transition: -webkit-filter 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), -webkit-transform 0.3s ease, color 0.3s ease;
             -webkit-font-smoothing: antialiased;
             will-change: filter, opacity, transform;
             -webkit-backface-visibility: hidden;
@@ -162,7 +162,7 @@
         }
 
         ::-webkit-scrollbar { display: none; }
-        .clip-mask { overflow: hidden; display: block; padding: 0.1em 0; }
+        .clip-mask { overflow: visible; display: block; padding: 0.2em 0.1em; }
 
         /* Gallery Z-Index Fix & Cross-Browser Dynamic Width Rule */
         .gallery-item {
@@ -268,7 +268,7 @@
     <!-- Immersive In-Page Video Player Modal -->
     <div id="video-modal" class="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <button id="close-modal" class="absolute top-6 right-8 text-white text-xs font-mono tracking-[0.3em] uppercase hover:opacity-70 transition-opacity z-10 p-4">
-            X
+            CLOSE
         </button>
         <div class="w-[90vw] md:w-[75vw] aspect-video max-w-5xl bg-neutral-900 rounded-2xl overflow-hidden shadow-2xl relative border border-white/10">
             <iframe id="modal-iframe" src="" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -304,29 +304,29 @@
         <div id="recent-release-container"></div>
     </section>
 
-    <!-- SECTION: WE ARE WHAT WE'VE MADE (SOLID BLACK BG, PURE BLUR) -->
-    <!-- STREAMING_CHUNK:Rendering We Are What We've Made transition section with solid black background and word-by-word focus hover blur... -->
-    <section id="we-are-made" class="relative w-full h-[100dvh] bg-black flex flex-col justify-center items-center px-6 md:px-16 z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] overflow-hidden">
+    <!-- SECTION: WE ARE WHAT WE'VE MADE (SAFE PADDING TO PREVENT CROPPING) -->
+    <!-- STREAMING_CHUNK:Rendering We Are What We've Made transition section with safe padding and overflow settings... -->
+    <section id="we-are-made" class="relative w-full h-[100dvh] bg-black flex flex-col justify-center items-center px-8 md:px-24 z-20 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] overflow-hidden">
         
-        <!-- Center Typographic Layout with Focus Blur Effect Per Word -->
+        <!-- Center Typographic Layout with Safe Scaling & Focus Blur Effect -->
         <div class="we-are-container relative z-25 my-auto flex flex-col items-center justify-center gap-2 md:gap-4 select-none w-full max-w-7xl">
-            <div class="flex justify-center gap-x-4 md:gap-x-8 clip-mask">
+            <div class="flex justify-center gap-x-3 md:gap-x-6 clip-mask">
                 <div class="we-are-word-wrap">
-                    <span class="we-are-word font-display font-black uppercase text-[12vw] md:text-[10vw] leading-[0.95] tracking-tighter text-white italic transform -rotate-1">WE</span>
+                    <span class="we-are-word font-display font-black uppercase text-[10.5vw] md:text-[9vw] leading-[1.0] tracking-tighter text-white italic transform -rotate-1">WE</span>
                 </div>
                 <div class="we-are-word-wrap">
-                    <span class="we-are-word font-display font-black uppercase text-[12vw] md:text-[10vw] leading-[0.95] tracking-tighter text-white italic transform -rotate-1">ARE</span>
+                    <span class="we-are-word font-display font-black uppercase text-[10.5vw] md:text-[9vw] leading-[1.0] tracking-tighter text-white italic transform -rotate-1">ARE</span>
                 </div>
             </div>
-            <div class="flex justify-center gap-x-4 md:gap-x-8 clip-mask mt-2 md:mt-4">
+            <div class="flex justify-center gap-x-3 md:gap-x-6 clip-mask mt-1 md:mt-3">
                 <div class="we-are-word-wrap">
-                    <span class="we-are-word font-display font-black uppercase text-[12vw] md:text-[10vw] leading-[0.95] tracking-tighter text-white italic transform -rotate-1">WHAT</span>
+                    <span class="we-are-word font-display font-black uppercase text-[10.5vw] md:text-[9vw] leading-[1.0] tracking-tighter text-white italic transform -rotate-1">WHAT</span>
                 </div>
                 <div class="we-are-word-wrap">
-                    <span class="we-are-word font-display font-black uppercase text-[12vw] md:text-[10vw] leading-[0.95] tracking-tighter text-white italic transform -rotate-1">WE'VE</span>
+                    <span class="we-are-word font-display font-black uppercase text-[10.5vw] md:text-[9vw] leading-[1.0] tracking-tighter text-white italic transform -rotate-1">WE'VE</span>
                 </div>
                 <div class="we-are-word-wrap">
-                    <span class="we-are-word font-display font-black uppercase text-[12vw] md:text-[10vw] leading-[0.95] tracking-tighter text-white italic transform -rotate-1">MADE</span>
+                    <span class="we-are-word font-display font-black uppercase text-[10.5vw] md:text-[9vw] leading-[1.0] tracking-tighter text-white italic transform -rotate-1">MADE</span>
                 </div>
             </div>
         </div>
@@ -408,7 +408,7 @@
     </section>
 
     <!-- Script Execution -->
-    <!-- STREAMING_CHUNK:Attaching password-protected CMS editor engine with customizable secret keyword and password... -->
+    <!-- STREAMING_CHUNK:Attaching password-protected CMS editor engine with instant hover speeds and enhanced floating animations... -->
     <script>
         // Custom Horizontal Oval Cursor Tracker (Skipped on touch devices via CSS, tracked on desktop)
         const cursor = document.getElementById('custom-cursor');
@@ -497,7 +497,7 @@
                     const leftPos = 110 + (idx * 18);
                     subHtml += `
                         <div class="gallery-item cms-gallery-item" style="left: ${leftPos}vw; top: ${topPercent}%;">
-                            <div class="parallax-wrap w-full h-full" data-mx="${(idx % 2 === 0 ? -2 : 3)}" data-my="${(idx % 3 === 0 ? 3 : -3)}">
+                            <div class="parallax-wrap w-full h-full" data-mx="${(idx % 2 === 0 ? -3 : 4)}" data-my="${(idx % 3 === 0 ? 4 : -4)}">
                                 <div class="idle-float w-full h-full">
                                     <div class="gallery-item-inner block relative w-full h-full overflow-hidden shadow-xl group cursor-pointer bg-black video-trigger" data-video-id="${item.videoId}">
                                         <img src="https://img.youtube.com/vi/${item.videoId}/maxresdefault.jpg" onerror="this.src='https://placehold.co/1280x720/111111/FFFFFF?text=${encodeURIComponent(item.title)}'" alt="${item.title}" class="w-full h-full object-cover">
@@ -525,6 +525,7 @@
             
             initVideoTriggers();
             initGalleryInteractions();
+            initIdleFloat();
         }
 
         renderRecentRelease();
@@ -886,19 +887,18 @@
             }
         });
 
-        // Animation: Space Floating Idle for Images
+        // Animation: Enhanced & Visible Space Floating Idle for Images (Smooth & Pronounced)
         function initIdleFloat() {
             gsap.utils.toArray('.idle-float').forEach((el) => {
                 gsap.to(el, {
-                    y: `+=${Math.random() * 70 - 35}`,
-                    x: `+=${Math.random() * 70 - 35}`,
-                    rotation: Math.random() * 16 - 8,
-                    duration: Math.random() * 3 + 4,
+                    y: `+=${Math.random() * 110 - 55}`,
+                    x: `+=${Math.random() * 110 - 55}`,
+                    rotation: Math.random() * 22 - 11,
+                    duration: Math.random() * 2.5 + 3.5,
                     yoyo: true, repeat: -1, ease: "sine.inOut", delay: Math.random() * 2
                 });
             });
         }
-        initIdleFloat();
 
         // Interaction: Mouse Move Parallax Offset
         const wrapper = document.getElementById('selected-work');
@@ -961,7 +961,7 @@
             y: 0, opacity: 1, duration: 1.5, ease: "expo.out"
         });
 
-        // Bulletproof Safari Hover Engine for .hover-text-fx using GSAP
+        // Instantaneous Safari/Chrome Hover Engine for .hover-text-fx (Zero Delay)
         if (window.matchMedia("(hover: hover)").matches) {
             document.querySelectorAll('.hover-text-fx').forEach(el => {
                 el.addEventListener('mouseenter', () => {
@@ -970,8 +970,8 @@
                         skewX: -6,
                         fontVariationSettings: '"slnt" -16',
                         color: '#0616C6',
-                        duration: 0.3,
-                        ease: "power2.out",
+                        duration: 0.05,
+                        ease: "power1.out",
                         overwrite: "auto"
                     });
                 });
@@ -981,15 +981,15 @@
                         skewX: 0,
                         fontVariationSettings: '"slnt" 0',
                         color: '#FFFFFF',
-                        duration: 0.3,
-                        ease: "power2.out",
+                        duration: 0.05,
+                        ease: "power1.out",
                         overwrite: "auto"
                     });
                 });
             });
         }
 
-        // Bulletproof Safari Hover Engine for .about-line using GSAP
+        // Instantaneous Safari/Chrome Hover Engine for .about-line (Zero Delay)
         if (window.matchMedia("(hover: hover)").matches) {
             document.querySelectorAll('.about-line').forEach(el => {
                 el.addEventListener('mouseenter', () => {
@@ -997,8 +997,8 @@
                         x: 8,
                         fontVariationSettings: '"slnt" -12',
                         color: '#0616C6',
-                        duration: 0.2,
-                        ease: "power2.out",
+                        duration: 0.05,
+                        ease: "power1.out",
                         overwrite: "auto"
                     });
                 });
@@ -1007,8 +1007,8 @@
                         x: 0,
                         fontVariationSettings: '"slnt" 0',
                         color: '#FFFFFF',
-                        duration: 0.2,
-                        ease: "power2.out",
+                        duration: 0.05,
+                        ease: "power1.out",
                         overwrite: "auto"
                     });
                 });

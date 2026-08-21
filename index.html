@@ -207,8 +207,8 @@
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
 
-    <!-- The Interactive Chat Box Modal -->
-    <div id="chat-modal" class="fixed bottom-28 md:bottom-36 right-6 md:right-10 z-[110] w-[calc(100vw-3rem)] md:w-96 opacity-0 pointer-events-none transition-all duration-500 transform translate-y-8 scale-95 origin-bottom-right">
+    <!-- The Interactive Chat Box Modal (Floating at bottom-right) -->
+    <div id="chat-modal" class="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[110] w-[calc(100vw-3rem)] md:w-96 opacity-0 pointer-events-none transition-all duration-500 transform translate-y-8 scale-95 origin-bottom-right">
         <div class="bg-black/90 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 shadow-2xl flex flex-col gap-5">
             <div class="flex justify-between items-center border-b border-white/10 pb-4">
                 <div class="flex items-center gap-2">
@@ -226,7 +226,7 @@
                 
                 <input type="text" id="chat-subject" name="subject" required placeholder="What are we making?" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-simbionBlue outline-none text-white tracking-wide transition-colors interactive-el">
                 
-                <textarea id="chat-body" name="message" required rows="3" placeholder="Tell us what’s on your mind" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-simbionBlue outline-none text-white tracking-wide resize-none transition-colors interactive-el"></textarea>
+                <textarea id="chat-body" name="message" required rows="3" placeholder="Anything on your mind?" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-simbionBlue outline-none text-white tracking-wide resize-none transition-colors interactive-el"></textarea>
                 
                 <button type="submit" id="chat-submit-btn" class="bg-simbionBlue text-white font-bold text-xs font-mono uppercase tracking-widest px-6 py-3.5 rounded-xl hover:bg-blue-700 transition-colors mt-2 interactive-el shadow-lg">
                     SEND MESSAGE
@@ -427,7 +427,7 @@
             ]
         };
 
-        let cmsData = JSON.parse(localStorage.getItem('simbion_cms_v7')) || defaultCMS;
+        let cmsData = JSON.parse(localStorage.getItem('simbion_cms_v9')) || defaultCMS;
 
         function renderRecentRelease() {
             const container = document.getElementById('recent-release-container');
@@ -732,7 +732,7 @@
                 });
             });
 
-            localStorage.setItem('simbion_cms_v7', JSON.stringify(cmsData));
+            localStorage.setItem('simbion_cms_v9', JSON.stringify(cmsData));
             renderRecentRelease();
             renderSelectedWorks();
             closeCmsModal();
@@ -741,7 +741,7 @@
 
         resetCmsBtn.addEventListener('click', () => {
             if (confirm('Reset all items to default?')) {
-                localStorage.removeItem('simbion_cms_v7');
+                localStorage.removeItem('simbion_cms_v9');
                 cmsData = JSON.parse(JSON.stringify(defaultCMS));
                 renderRecentRelease();
                 renderSelectedWorks();
@@ -964,7 +964,6 @@
                         scale: 1, duration: 0.8, ease: "power3.out", overwrite: "auto",
                         onComplete: () => gsap.set(item, { zIndex: 10 }) 
                     });
-                    galleryItems.gotoEach?.(other => gsap.to(other, { x: "0vw", duration: 0.8, ease: "power3.out", overwrite: "auto" }));
                     galleryItems.forEach((other) => {
                         gsap.to(other, { x: "0vw", duration: 0.8, ease: "power3.out", overwrite: "auto" });
                     });
@@ -999,10 +998,10 @@
             });
             document.querySelectorAll('.about-line').forEach(el => {
                 el.addEventListener('mouseenter', () => {
-                    gsap.to(el, { x: 8, fontVariationSettings: '"slnt" -12', color: '#0616C6', duration: 0.05, ease: "power1.out", overwrite: "auto" });
+                    gsap.to(el, { x: 8, fontVariationSettings: '"slnt" -12', color: '#0616C6', duration: 0.05, ease: "power1.out", overwrite: "home", overwrite: "auto" });
                 });
                 el.addEventListener('mouseleave', () => {
-                    gsap.to(el, { x: `0px`, fontVariationSettings: '"slnt" 0', color: '#FFFFFF', duration: 0.05, ease: "power1.out", overwrite: "auto" });
+                    gsap.to(el, { x: 0, fontVariationSettings: '"slnt" 0', color: '#FFFFFF', duration: 0.05, ease: "power1.out", overwrite: "auto" });
                 });
             });
         }

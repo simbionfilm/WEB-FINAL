@@ -30,7 +30,6 @@
     </script>
 
     <style>
-        /* STREAMING_CHUNK:Configuring momentum scrolling and uniform font application... */
         html.lenis { height: auto; }
         .lenis.lenis-smooth { scroll-behavior: auto; }
         .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
@@ -196,7 +195,6 @@
 </head>
 <body class="font-sans">
 
-    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, chat balloon, and modal components... -->
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
 
@@ -209,7 +207,7 @@
         </div>
     </div>
 
-    <!-- The Interactive Chat Box Modal (Previous Clean Style) -->
+    <!-- The Interactive Chat Box Modal -->
     <div id="chat-modal" class="fixed bottom-32 md:bottom-40 right-6 md:right-10 z-[110] w-[calc(100vw-3rem)] md:w-96 opacity-0 pointer-events-none transition-all duration-500 transform translate-y-8 scale-95 origin-bottom-right">
         <div class="bg-black/90 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 shadow-2xl flex flex-col gap-5">
             <div class="flex justify-between items-center border-b border-white/10 pb-4">
@@ -220,16 +218,11 @@
                 <button id="close-chat" class="text-[10px] font-mono text-mutedText hover:text-white transition-colors uppercase tracking-widest cursor-pointer interactive-el">CLOSE [X]</button>
             </div>
             
-            <!-- Chat Form using Web3Forms -->
             <form id="contact-chat-form" class="flex flex-col gap-3">
                 <input type="hidden" name="access_key" value="37b802f2-c5e1-4645-b47f-d69dc4ca3aec">
-                
                 <input type="email" id="chat-email" name="email" required placeholder="Your email, please" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-simbionBlue outline-none text-white tracking-wide transition-colors interactive-el">
-                
                 <input type="text" id="chat-subject" name="subject" required placeholder="What are we making?" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-simbionBlue outline-none text-white tracking-wide transition-colors interactive-el">
-                
                 <textarea id="chat-body" name="message" required rows="3" placeholder="Tell us what’s on your mind" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs focus:border-simbionBlue outline-none text-white tracking-wide resize-none transition-colors interactive-el"></textarea>
-                
                 <button type="submit" id="chat-submit-btn" class="bg-simbionBlue text-white font-bold text-xs font-mono uppercase tracking-widest px-6 py-3.5 rounded-xl hover:bg-blue-700 transition-colors mt-2 interactive-el shadow-lg">
                     SEND MESSAGE
                 </button>
@@ -342,8 +335,9 @@
     </section>
 
     <section id="selected-work" class="relative bg-black z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] w-full h-[100dvh] overflow-hidden flex flex-col">
+        <!-- Judul sekarang diam di tempat, tidak ikut geser kiri/kanan -->
         <div class="absolute top-24 md:top-28 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
-            <h2 id="selected-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase origin-left transition-transform">SELECTED WORKS</h2>
+            <h2 id="selected-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">SELECTED WORKS</h2>
         </div>
         <div class="relative w-full flex-1 overflow-hidden">
             <div class="film-track" id="film-track"></div>
@@ -351,8 +345,9 @@
     </section>
 
     <section id="about" class="relative w-full h-[100dvh] bg-black text-white flex flex-col justify-center px-6 md:px-16 py-16 z-40 shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
+        <!-- Judul sekarang diam di tempat, tidak ikut geser kiri/kanan -->
         <div class="absolute top-28 md:top-32 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
-            <h2 id="about-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase origin-left transition-transform">ABOUT US</h2>
+            <h2 id="about-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">ABOUT US</h2>
         </div>
         <div class="max-w-6xl w-full text-left space-y-6 md:space-y-8 my-auto pt-24 md:pt-32">
             <div class="clip-mask"><p class="text-lg md:text-2xl lg:text-3xl font-bold tracking-widest leading-tight uppercase"><span class="about-line interactive-el">SIMBION IS AN INDEPENDENT FILMMAKING BOUTIQUE BASED IN SOUTH JAKARTA, INDONESIA.</span></p></div>
@@ -754,9 +749,10 @@
             }
         });
 
+        // 1. SETTING LENIS DIUBAH DI SINI
         const lenis = new Lenis({
-            duration: 1.4,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -12 * t)),
+            duration: 2.5, // Diperpanjang agar tidak mengebut (sebelumnya 1.4)
+            easing: (t) => 1 - Math.pow(1 - t, 5), // Kurva easing yang jauh lebih smooth & tertunda
             direction: 'vertical',
             smooth: true,
             smoothTouch: false,
@@ -832,8 +828,8 @@
         });
 
         const filmTrack = document.getElementById("film-track");
-        const selectedTitle = document.getElementById("selected-title");
 
+        // 2. MENGHAPUS FUNGSI onUpdate YANG MENGGESER JUDUL
         gsap.to(filmTrack, {
             x: () => -(filmTrack.scrollWidth - window.innerWidth),
             ease: "none",
@@ -844,38 +840,11 @@
                 scrub: 1.2, 
                 pin: true, 
                 anticipatePin: 1,
-                invalidateOnRefresh: true,
-                onUpdate: (self) => {
-                    const dir = self.direction;
-                    if (selectedTitle) {
-                        gsap.to(selectedTitle, {
-                            x: dir * 45,
-                            duration: 0.4,
-                            ease: "power2.out",
-                            overwrite: "auto"
-                        });
-                    }
-                }
+                invalidateOnRefresh: true
             }
         });
 
-        const aboutTitle = document.getElementById("about-title");
-        ScrollTrigger.create({
-            trigger: "#about",
-            start: "top bottom",
-            end: "bottom top",
-            onUpdate: (self) => {
-                const dir = self.direction;
-                if (aboutTitle) {
-                    gsap.to(aboutTitle, {
-                        x: dir * 45,
-                        duration: 0.4,
-                        ease: "power2.out",
-                        overwrite: "auto"
-                    });
-                }
-            }
-        });
+        // Bagian ScrollTrigger terpisah untuk '#about' yang menggeser judul sudah dihapus sepenuhnya
 
         ScrollTrigger.create({
             trigger: "#selected-work",

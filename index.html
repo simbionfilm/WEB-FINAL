@@ -335,7 +335,7 @@
     </section>
 
     <section id="selected-work" class="relative bg-black z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] w-full h-[100dvh] overflow-hidden flex flex-col">
-        <!-- Judul sekarang diam di tempat -->
+        <!-- Judul diam di tempat -->
         <div class="absolute top-24 md:top-28 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
             <h2 id="selected-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">SELECTED WORKS</h2>
         </div>
@@ -345,7 +345,7 @@
     </section>
 
     <section id="about" class="relative w-full h-[100dvh] bg-black text-white flex flex-col justify-center px-6 md:px-16 py-16 z-40 shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
-        <!-- Judul sekarang diam di tempat -->
+        <!-- Judul diam di tempat -->
         <div class="absolute top-28 md:top-32 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
             <h2 id="about-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">ABOUT US</h2>
         </div>
@@ -474,9 +474,10 @@
             html += renderRows(row2, 41);
             html += renderRows(row3, 68);
 
-            // PERBAIKAN: Menghapus 450vw yang membuat blank hitam. Lebar sekarang menyesuaikan jumlah maxItems + sedikit padding.
+            // PERBAIKAN: Menghitung panjang galeri dengan tambahan padding ekstra 
+            // agar karya terakhir punya cukup ruang untuk meluncur keluar sebelum layar berpindah.
             const maxItems = Math.max(row1.length, row2.length, row3.length);
-            const dynamicWidth = 110 + (maxItems * 18) + 20; 
+            const dynamicWidth = 110 + ((maxItems - 1) * 18) + 60; // 60vw adalah ruang 'kosong' ekstra agar item bisa keluar kiri
             track.style.width = `${dynamicWidth}vw`;
             track.innerHTML = html;
             
@@ -829,14 +830,15 @@
 
         const filmTrack = document.getElementById("film-track");
 
-        // PERBAIKAN: Jarak scroll vertikal (end point) sekarang menyesuaikan persis dengan panjang geser ke samping
+        // PERBAIKAN: Animasi bergeser penuh (-filmTrack.scrollWidth) dari ujung ke ujung.
+        // Dengan ini, setelah thumbnail terakhir muncul, ia akan terus geser sampai hilang total dari layar.
         gsap.to(filmTrack, {
-            x: () => -(filmTrack.scrollWidth - window.innerWidth),
+            x: () => -filmTrack.scrollWidth,
             ease: "none",
             scrollTrigger: {
                 trigger: "#selected-work",
                 start: "top top",
-                end: () => "+=" + (filmTrack.scrollWidth - window.innerWidth), 
+                end: () => "+=" + filmTrack.scrollWidth, 
                 scrub: 1, 
                 pin: true, 
                 anticipatePin: 1,
@@ -979,4 +981,3 @@
     </script>
 </body>
 </html>
-```eof

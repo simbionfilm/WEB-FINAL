@@ -335,7 +335,7 @@
     </section>
 
     <section id="selected-work" class="relative bg-black z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] w-full h-[100dvh] overflow-hidden flex flex-col">
-        <!-- Judul sekarang diam di tempat, tidak ikut geser kiri/kanan -->
+        <!-- Judul sekarang diam di tempat -->
         <div class="absolute top-24 md:top-28 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
             <h2 id="selected-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">SELECTED WORKS</h2>
         </div>
@@ -345,7 +345,7 @@
     </section>
 
     <section id="about" class="relative w-full h-[100dvh] bg-black text-white flex flex-col justify-center px-6 md:px-16 py-16 z-40 shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
-        <!-- Judul sekarang diam di tempat, tidak ikut geser kiri/kanan -->
+        <!-- Judul sekarang diam di tempat -->
         <div class="absolute top-28 md:top-32 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
             <h2 id="about-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">ABOUT US</h2>
         </div>
@@ -474,8 +474,9 @@
             html += renderRows(row2, 41);
             html += renderRows(row3, 68);
 
+            // PERBAIKAN: Menghapus 450vw yang membuat blank hitam. Lebar sekarang menyesuaikan jumlah maxItems + sedikit padding.
             const maxItems = Math.max(row1.length, row2.length, row3.length);
-            const dynamicWidth = Math.max(450, 120 + (maxItems * 18));
+            const dynamicWidth = 110 + (maxItems * 18) + 20; 
             track.style.width = `${dynamicWidth}vw`;
             track.innerHTML = html;
             
@@ -749,10 +750,9 @@
             }
         });
 
-        // 1. SETTING LENIS DIUBAH DI SINI
         const lenis = new Lenis({
-            duration: 2.5, // Diperpanjang agar tidak mengebut (sebelumnya 1.4)
-            easing: (t) => 1 - Math.pow(1 - t, 5), // Kurva easing yang jauh lebih smooth & tertunda
+            duration: 2.5, 
+            easing: (t) => 1 - Math.pow(1 - t, 5),
             direction: 'vertical',
             smooth: true,
             smoothTouch: false,
@@ -829,22 +829,20 @@
 
         const filmTrack = document.getElementById("film-track");
 
-        // 2. MENGHAPUS FUNGSI onUpdate YANG MENGGESER JUDUL
+        // PERBAIKAN: Jarak scroll vertikal (end point) sekarang menyesuaikan persis dengan panjang geser ke samping
         gsap.to(filmTrack, {
             x: () => -(filmTrack.scrollWidth - window.innerWidth),
             ease: "none",
             scrollTrigger: {
                 trigger: "#selected-work",
                 start: "top top",
-                end: () => "+=" + filmTrack.scrollWidth, 
-                scrub: 1.2, 
+                end: () => "+=" + (filmTrack.scrollWidth - window.innerWidth), 
+                scrub: 1, 
                 pin: true, 
                 anticipatePin: 1,
                 invalidateOnRefresh: true
             }
         });
-
-        // Bagian ScrollTrigger terpisah untuk '#about' yang menggeser judul sudah dihapus sepenuhnya
 
         ScrollTrigger.create({
             trigger: "#selected-work",

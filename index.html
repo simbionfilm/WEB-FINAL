@@ -1,3 +1,4 @@
+<!-- STREAMING_CHUNK: Setting up HTML Document Structure and Styles -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -100,17 +101,13 @@
         }
         .slot-char {
             display: inline-block;
+            will-change: transform;
             transform: translateY(120%);
             -webkit-transform: translateY(120%);
         }
         .slot-char.static {
             transform: translateY(0%);
             -webkit-transform: translateY(0%);
-        }
-        
-        .velocity-char {
-            display: inline-block;
-            will-change: transform;
         }
 
         .hover-text-fx {
@@ -200,6 +197,7 @@
 </head>
 <body class="font-sans">
 
+    <!-- STREAMING_CHUNK: Rendering UI Elements and Modals -->
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
 
@@ -307,6 +305,7 @@
     <nav class="fixed top-0 w-full z-[100] p-6 mix-blend-difference flex justify-between items-start pointer-events-none text-xs md:text-sm tracking-widest text-white">
         <div class="pointer-events-auto flex flex-col gap-1">
             <a href="#hero" class="hover:opacity-80 transition-opacity">
+                <!-- Ukuran logo diperbesar 40% -->
                 <img src="LOGOmuter.gif" alt="SIMBION FILM" class="h-[17px] md:h-[23px]" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span class=\'font-bold text-xs\'>SIMBION</span>');">
             </a>
         </div>
@@ -314,6 +313,7 @@
 
     <div id="recent-release-container"></div>
 
+    <!-- STREAMING_CHUNK: Rendering Main Layout Sections -->
     <section id="hero" class="sticky top-0 w-full h-[100dvh] flex flex-col justify-center items-center px-4 md:px-8 bg-black z-10 shadow-2xl">
         <div class="w-full max-w-2xl flex justify-center parallax-hero z-10">
             <img src="ORANGSHOOTINGALPHACREDIT-ezgif.com-video-to-gif-converter.gif" alt="Filmmaking GIF" class="w-full h-auto object-contain interactive-el" onerror="this.src='https://placehold.co/600x400/000000/FFFFFF?text=Falling+Cameraman+GIF'">
@@ -340,7 +340,7 @@
     </section>
 
     <section id="selected-work" class="relative bg-black z-30 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] w-full h-[100dvh] overflow-hidden flex flex-col">
-        <!-- Judul diam di tempat -->
+        <!-- Judul memudar saat gallery meluncur masuk -->
         <div class="absolute top-24 md:top-28 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
             <h2 id="selected-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">SELECTED WORKS</h2>
         </div>
@@ -350,7 +350,6 @@
     </section>
 
     <section id="about" class="relative w-full h-[100dvh] bg-black text-white flex flex-col justify-center px-6 md:px-16 py-16 z-40 shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
-        <!-- Judul diam di tempat -->
         <div class="absolute top-28 md:top-32 left-6 md:left-12 z-50 pointer-events-none mix-blend-difference">
             <h2 id="about-title" class="text-2xl md:text-4xl font-bold tracking-tight text-white uppercase">ABOUT US</h2>
         </div>
@@ -379,6 +378,7 @@
         </div>
     </section>
 
+    <!-- STREAMING_CHUNK: Initializing JavaScript Functions & Logic -->
     <script>
         const cursor = document.getElementById('custom-cursor');
         window.addEventListener('mousemove', (e) => {
@@ -754,7 +754,6 @@
             }
         });
 
-        // 1. Lenis Init - Menyempurnakan efek velocity scroll ke atas & bawah
         const lenis = new Lenis({
             duration: 2.5, 
             easing: (t) => 1 - Math.pow(1 - t, 5),
@@ -763,21 +762,7 @@
             smoothTouch: false,
         });
         
-        lenis.on('scroll', (e) => {
-            ScrollTrigger.update();
-            
-            // Mengambil kecepatan & arah scroll (positif = ke bawah, negatif = ke atas)
-            const vel = e.velocity || 0;
-            // Diperkuat skalanya agar terlihat jelas terdorong ke atas/bawah
-            const yOffset = gsap.utils.clamp(-90, 90, vel * 6);
-            
-            gsap.to('.velocity-char', {
-                y: `${yOffset}%`,
-                duration: 0.2,
-                ease: "power2.out",
-                overwrite: "auto"
-            });
-        });
+        lenis.on('scroll', ScrollTrigger.update);
 
         gsap.ticker.add((time) => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
@@ -799,16 +784,12 @@
                 const inner = document.createElement('span');
                 const willRoll = Math.random() > 0.35;
                 inner.className = willRoll ? 'slot-char rolling block' : 'slot-char static block';
+                inner.textContent = char;
                 if (!willRoll) {
                     inner.style.transform = 'translateY(0%)';
                     inner.style.webkitTransform = 'translateY(0%)';
                 }
                 
-                const velChar = document.createElement('span');
-                velChar.className = 'velocity-char block';
-                velChar.textContent = char;
-                
-                inner.appendChild(velChar);
                 wrapper.appendChild(inner);
                 el.appendChild(wrapper);
             });
@@ -853,7 +834,7 @@
 
         const filmTrack = document.getElementById("film-track");
 
-        // 2. Animasi Horizontal Scroll
+        // Horizontal Scroll
         gsap.to(filmTrack, {
             x: () => -filmTrack.scrollWidth,
             ease: "none",
@@ -868,10 +849,10 @@
             }
         });
 
-        // 3. FITUR BARU: Judul "SELECTED WORKS" fade out (memudar) saat project mulai slide ke kiri
+        // Judul SELECTED WORKS fade out secara mulus ketika galeri mulai tergeser masuk
         gsap.to("#selected-title", {
             opacity: 0,
-            y: -30,
+            y: -25,
             ease: "power1.out",
             scrollTrigger: {
                 trigger: "#selected-work",
@@ -881,47 +862,74 @@
             }
         });
 
+        // EFEK ROLLING BERSUASUAS DENGAN ARAH SCROLL (UP/DOWN)
         ScrollTrigger.create({
             trigger: "#selected-work",
-            start: "top 70%",
-            onEnter: () => {
-                gsap.to("#selected-work .slot-char.rolling", {
-                    y: "0%",
-                    duration: () => gsap.utils.random(1.2, 2.2),
-                    ease: "power3.out",
-                    stagger: { amount: 0.8, from: "random" },
-                    overwrite: "auto"
-                });
+            start: "top 80%",
+            onEnter: () => { // Scroll ke bawah masuk ke section
+                gsap.fromTo("#selected-work .slot-char.rolling", 
+                    { y: "120%" }, 
+                    {
+                        y: "0%",
+                        duration: () => gsap.utils.random(1.2, 2.0),
+                        ease: "power3.out",
+                        stagger: { amount: 0.6, from: "random" },
+                        overwrite: "auto"
+                    }
+                );
             },
-            onLeaveBack: () => {
-                gsap.to("#selected-work .slot-char.rolling", {
-                    y: "120%",
-                    duration: 0.5,
-                    ease: "power2.in",
-                    overwrite: "auto"
-                });
+            onEnterBack: () => { // Scroll ke atas balik masuk ke section
+                gsap.fromTo("#selected-work .slot-char.rolling", 
+                    { y: "-120%" }, 
+                    {
+                        y: "0%",
+                        duration: () => gsap.utils.random(1.2, 2.0),
+                        ease: "power3.out",
+                        stagger: { amount: 0.6, from: "random" },
+                        overwrite: "auto"
+                    }
+                );
+            },
+            onLeave: () => { // Lewat ke bawah (keluar)
+                gsap.to("#selected-work .slot-char.rolling", { y: "-120%", duration: 0.4, ease: "power2.in", overwrite: "auto" });
+            },
+            onLeaveBack: () => { // Lewat ke atas (keluar)
+                gsap.to("#selected-work .slot-char.rolling", { y: "120%", duration: 0.4, ease: "power2.in", overwrite: "auto" });
             }
         });
 
         ScrollTrigger.create({
             trigger: "#about",
-            start: "top 70%",
-            onEnter: () => {
-                gsap.to("#about .slot-char.rolling", {
-                    y: "0%",
-                    duration: () => gsap.utils.random(1.2, 2.2),
-                    ease: "power3.out",
-                    stagger: { amount: 0.8, from: "random" },
-                    overwrite: "auto"
-                });
+            start: "top 80%",
+            onEnter: () => { // Scroll ke bawah masuk ke section
+                gsap.fromTo("#about .slot-char.rolling", 
+                    { y: "120%" }, 
+                    {
+                        y: "0%",
+                        duration: () => gsap.utils.random(1.2, 2.0),
+                        ease: "power3.out",
+                        stagger: { amount: 0.6, from: "random" },
+                        overwrite: "auto"
+                    }
+                );
             },
-            onLeaveBack: () => {
-                gsap.to("#about .slot-char.rolling", {
-                    y: "120%",
-                    duration: 0.5,
-                    ease: "power2.in",
-                    overwrite: "auto"
-                });
+            onEnterBack: () => { // Scroll ke atas balik masuk ke section
+                gsap.fromTo("#about .slot-char.rolling", 
+                    { y: "-120%" }, 
+                    {
+                        y: "0%",
+                        duration: () => gsap.utils.random(1.2, 2.0),
+                        ease: "power3.out",
+                        stagger: { amount: 0.6, from: "random" },
+                        overwrite: "auto"
+                    }
+                );
+            },
+            onLeave: () => { // Lewat ke bawah (keluar)
+                gsap.to("#about .slot-char.rolling", { y: "-120%", duration: 0.4, ease: "power2.in", overwrite: "auto" });
+            },
+            onLeaveBack: () => { // Lewat ke atas (keluar)
+                gsap.to("#about .slot-char.rolling", { y: "120%", duration: 0.4, ease: "power2.in", overwrite: "auto" });
             }
         });
 

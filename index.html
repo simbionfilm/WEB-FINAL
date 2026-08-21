@@ -302,7 +302,8 @@
     <nav class="fixed top-0 w-full z-[100] p-6 mix-blend-difference flex justify-between items-start pointer-events-none text-xs md:text-sm tracking-widest text-white">
         <div class="pointer-events-auto flex flex-col gap-1">
             <a href="#hero" class="hover:opacity-80 transition-opacity">
-                <img src="LOGOmuter.gif" alt="SIMBION FILM" class="h-3 md:h-4" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span class=\'font-bold text-xs\'>SIMBION</span>');">
+                <!-- UKURAN LOGO DIPERBESAR 40% DI SINI -->
+                <img src="LOGOmuter.gif" alt="SIMBION FILM" class="h-[17px] md:h-[23px]" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span class=\'font-bold text-xs\'>SIMBION</span>');">
             </a>
         </div>
     </nav>
@@ -474,10 +475,8 @@
             html += renderRows(row2, 41);
             html += renderRows(row3, 68);
 
-            // PERBAIKAN: Menghitung panjang galeri dengan tambahan padding ekstra 
-            // agar karya terakhir punya cukup ruang untuk meluncur keluar sebelum layar berpindah.
             const maxItems = Math.max(row1.length, row2.length, row3.length);
-            const dynamicWidth = 110 + ((maxItems - 1) * 18) + 60; // 60vw adalah ruang 'kosong' ekstra agar item bisa keluar kiri
+            const dynamicWidth = 110 + ((maxItems - 1) * 18) + 60; 
             track.style.width = `${dynamicWidth}vw`;
             track.innerHTML = html;
             
@@ -830,8 +829,6 @@
 
         const filmTrack = document.getElementById("film-track");
 
-        // PERBAIKAN: Animasi bergeser penuh (-filmTrack.scrollWidth) dari ujung ke ujung.
-        // Dengan ini, setelah thumbnail terakhir muncul, ia akan terus geser sampai hilang total dari layar.
         gsap.to(filmTrack, {
             x: () => -filmTrack.scrollWidth,
             ease: "none",
@@ -981,3 +978,4 @@
     </script>
 </body>
 </html>
+```eof

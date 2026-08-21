@@ -30,7 +30,6 @@
     </script>
 
     <style>
-        /* STREAMING_CHUNK:Configuring momentum scrolling and uniform font application... */
         html.lenis { height: auto; }
         .lenis.lenis-smooth { scroll-behavior: auto; }
         .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
@@ -196,7 +195,6 @@
 </head>
 <body class="font-sans">
 
-    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, chat balloon, and modal components... -->
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
 
@@ -209,7 +207,7 @@
         </div>
     </div>
 
-    <!-- The Interactive Chat Box Modal (Previous Clean Style) -->
+    <!-- The Interactive Chat Box Modal -->
     <div id="chat-modal" class="fixed bottom-32 md:bottom-40 right-6 md:right-10 z-[110] w-[calc(100vw-3rem)] md:w-96 opacity-0 pointer-events-none transition-all duration-500 transform translate-y-8 scale-95 origin-bottom-right">
         <div class="bg-black/90 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 shadow-2xl flex flex-col gap-5">
             <div class="flex justify-between items-center border-b border-white/10 pb-4">
@@ -421,7 +419,8 @@
             ]
         };
 
-        let cmsData = JSON.parse(localStorage.getItem('simbion_cms')) || defaultCMS;
+        // Using versioned storage key 'simbion_cms_v2' to force cache refresh across browsers like Chrome
+        let cmsData = JSON.parse(localStorage.getItem('simbion_cms_v2')) || defaultCMS;
 
         function renderRecentRelease() {
             const container = document.getElementById('recent-release-container');
@@ -736,7 +735,7 @@
                 });
             });
 
-            localStorage.setItem('simbion_cms', JSON.stringify(cmsData));
+            localStorage.setItem('simbion_cms_v2', JSON.stringify(cmsData));
             renderRecentRelease();
             renderSelectedWorks();
             closeCmsModal();
@@ -745,7 +744,7 @@
 
         resetCmsBtn.addEventListener('click', () => {
             if (confirm('Reset all items to default?')) {
-                localStorage.removeItem('simbion_cms');
+                localStorage.removeItem('simbion_cms_v2');
                 cmsData = JSON.parse(JSON.stringify(defaultCMS));
                 renderRecentRelease();
                 renderSelectedWorks();
@@ -1012,4 +1011,3 @@
     </script>
 </body>
 </html>
-```eof

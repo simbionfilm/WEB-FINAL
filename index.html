@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIMBION FILM</title>
     
+    <!-- Browser Tab Favicon using orang.png -->
     <link rel="icon" type="image/png" href="orang.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,6 +30,7 @@
     </script>
 
     <style>
+        /* STREAMING_CHUNK:Configuring smooth scroll and uniform font styling across all elements... */
         html.lenis { height: auto; }
         .lenis.lenis-smooth { scroll-behavior: auto; }
         .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
@@ -201,6 +203,7 @@
 </head>
 <body class="font-sans">
 
+    <!-- STREAMING_CHUNK:Initializing custom cursor, progress bar, chat modal, and navigation... -->
     <div class="custom-cursor" id="custom-cursor"></div>
     <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-simbionBlue w-full origin-left scale-x-0 z-[100]"></div>
 
@@ -424,15 +427,21 @@
             ]
         };
 
-        let cmsData = JSON.parse(localStorage.getItem('simbion_cms_v2')) || defaultCMS;
+        let cmsData = JSON.parse(localStorage.getItem('simbion_cms_v3')) || defaultCMS;
 
         function renderRecentRelease() {
             const container = document.getElementById('recent-release-container');
             const rr = cmsData.recentRelease;
             container.innerHTML = `
                 <a href="${rr.link}" target="_blank" class="fixed top-5 right-6 md:right-12 z-[105] flex items-center gap-3 group cursor-pointer interactive-el transition-all">
-                    <div class="text-right">
-                        <span class="text-[10px] md:text-xs tracking-[0.15em] font-bold font-mono text-white block uppercase group-hover:text-simbionBlue transition-colors">NEW RELEASE</span>
+                    <!-- Full Title & Artist on Desktop / Laptop / iPad -->
+                    <div class="text-right hidden md:block">
+                        <span class="text-xs md:text-sm tracking-[0.15em] font-bold font-mono text-white block uppercase">NEW RELEASE</span>
+                        <span class="text-[11px] font-bold tracking-tight text-white block uppercase group-hover:text-simbionBlue transition-colors">${rr.title}</span>
+                    </div>
+                    <!-- Minimalist on Mobile: Only NEW RELEASE text + vinyl -->
+                    <div class="text-right block md:hidden">
+                        <span class="text-[10px] tracking-[0.15em] font-bold font-mono text-white block uppercase">NEW RELEASE</span>
                     </div>
                     <div class="relative w-11 h-11 md:w-14 md:h-14 rounded-full bg-simbionBlue shadow-2xl flex items-center justify-center animate-[spin_6s_linear_infinite] group-hover:scale-110 transition-transform">
                         <div class="absolute inset-1 rounded-full border border-white/20 pointer-events-none"></div>
@@ -723,7 +732,7 @@
                 });
             });
 
-            localStorage.setItem('simbion_cms_v2', JSON.stringify(cmsData));
+            localStorage.setItem('simbion_cms_v3', JSON.stringify(cmsData));
             renderRecentRelease();
             renderSelectedWorks();
             closeCmsModal();
@@ -732,7 +741,7 @@
 
         resetCmsBtn.addEventListener('click', () => {
             if (confirm('Reset all items to default?')) {
-                localStorage.removeItem('simbion_cms_v2');
+                localStorage.removeItem('simbion_cms_v3');
                 cmsData = JSON.parse(JSON.stringify(defaultCMS));
                 renderRecentRelease();
                 renderSelectedWorks();
@@ -999,3 +1008,4 @@
     </script>
 </body>
 </html>
+```eof

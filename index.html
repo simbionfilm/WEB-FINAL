@@ -107,6 +107,12 @@
             transform: translateY(0%);
             -webkit-transform: translateY(0%);
         }
+        
+        /* Class baru untuk merespon kecepatan scroll */
+        .velocity-char {
+            display: inline-block;
+            will-change: transform;
+        }
 
         .hover-text-fx {
             display: inline-block;
@@ -302,7 +308,6 @@
     <nav class="fixed top-0 w-full z-[100] p-6 mix-blend-difference flex justify-between items-start pointer-events-none text-xs md:text-sm tracking-widest text-white">
         <div class="pointer-events-auto flex flex-col gap-1">
             <a href="#hero" class="hover:opacity-80 transition-opacity">
-                <!-- UKURAN LOGO DIPERBESAR 40% DI SINI -->
                 <img src="LOGOmuter.gif" alt="SIMBION FILM" class="h-[17px] md:h-[23px]" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span class=\'font-bold text-xs\'>SIMBION</span>');">
             </a>
         </div>
@@ -750,6 +755,7 @@
             }
         });
 
+        // Lenis Init - Modifikasi event on('scroll') ada di bawah
         const lenis = new Lenis({
             duration: 2.5, 
             easing: (t) => 1 - Math.pow(1 - t, 5),
@@ -758,7 +764,23 @@
             smoothTouch: false,
         });
         
-        lenis.on('scroll', ScrollTrigger.update);
+        // MODIFIKASI: Menambahkan listener kecepatan (velocity) scroll
+        lenis.on('scroll', (e) => {
+            ScrollTrigger.update();
+            
+            // Efek Momentum / Velocity React pada judul
+            const vel = e.velocity || 0;
+            // Batasi pergeseran huruf maksimum -50% sampai 50%
+            const yOffset = gsap.utils.clamp(-50, 50, -vel * 2);
+            
+            gsap.to('.velocity-char', {
+                y: `${yOffset}%`,
+                duration: 0.25,
+                ease: "power2.out",
+                overwrite: "auto"
+            });
+        });
+
         gsap.ticker.add((time) => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
 
@@ -775,16 +797,22 @@
                 }
                 const wrapper = document.createElement('span');
                 wrapper.className = 'slot-wrapper';
-                const inner = document.createElement('span');
                 
+                const inner = document.createElement('span');
                 const willRoll = Math.random() > 0.35;
-                inner.className = willRoll ? 'slot-char rolling' : 'slot-char static';
-                inner.textContent = char;
+                // Tambahkan class block agar inner bisa menerima elemen anak dengan baik
+                inner.className = willRoll ? 'slot-char rolling block' : 'slot-char static block';
                 if (!willRoll) {
                     inner.style.transform = 'translateY(0%)';
                     inner.style.webkitTransform = 'translateY(0%)';
                 }
                 
+                // MODIFIKASI: Bungkus huruf dengan elemen .velocity-char
+                const velChar = document.createElement('span');
+                velChar.className = 'velocity-char block';
+                velChar.textContent = char;
+                
+                inner.appendChild(velChar);
                 wrapper.appendChild(inner);
                 el.appendChild(wrapper);
             });

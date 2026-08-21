@@ -427,7 +427,7 @@
             ]
         };
 
-        let cmsData = JSON.parse(localStorage.getItem('simbion_cms_v6')) || defaultCMS;
+        let cmsData = JSON.parse(localStorage.getItem('simbion_cms_v7')) || defaultCMS;
 
         function renderRecentRelease() {
             const container = document.getElementById('recent-release-container');
@@ -732,7 +732,7 @@
                 });
             });
 
-            localStorage.setItem('simbion_cms_v6', JSON.stringify(cmsData));
+            localStorage.setItem('simbion_cms_v7', JSON.stringify(cmsData));
             renderRecentRelease();
             renderSelectedWorks();
             closeCmsModal();
@@ -741,7 +741,7 @@
 
         resetCmsBtn.addEventListener('click', () => {
             if (confirm('Reset all items to default?')) {
-                localStorage.removeItem('simbion_cms_v6');
+                localStorage.removeItem('simbion_cms_v7');
                 cmsData = JSON.parse(JSON.stringify(defaultCMS));
                 renderRecentRelease();
                 renderSelectedWorks();
@@ -964,6 +964,7 @@
                         scale: 1, duration: 0.8, ease: "power3.out", overwrite: "auto",
                         onComplete: () => gsap.set(item, { zIndex: 10 }) 
                     });
+                    galleryItems.gotoEach?.(other => gsap.to(other, { x: "0vw", duration: 0.8, ease: "power3.out", overwrite: "auto" }));
                     galleryItems.forEach((other) => {
                         gsap.to(other, { x: "0vw", duration: 0.8, ease: "power3.out", overwrite: "auto" });
                     });
@@ -1001,7 +1002,7 @@
                     gsap.to(el, { x: 8, fontVariationSettings: '"slnt" -12', color: '#0616C6', duration: 0.05, ease: "power1.out", overwrite: "auto" });
                 });
                 el.addEventListener('mouseleave', () => {
-                    gsap.to(el, { x: 0, fontVariationSettings: '"slnt" 0', color: '#FFFFFF', duration: 0.05, ease: "power1.out", overwrite: "auto" });
+                    gsap.to(el, { x: `0px`, fontVariationSettings: '"slnt" 0', color: '#FFFFFF', duration: 0.05, ease: "power1.out", overwrite: "auto" });
                 });
             });
         }

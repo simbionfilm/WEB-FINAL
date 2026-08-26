@@ -419,7 +419,7 @@
     
     <div class="header-blur-mask"></div>
 
-    <div id="chat-balloon" class="fixed bottom-12 md:bottom-16 right-6 md:right-10 z-[105] group cursor-pointer interactive-el floating-widget  transition-all duration-500 origin-bottom-right">
+    <div id="chat-balloon" class="fixed bottom-12 md:bottom-16 right-6 md:right-10 z-[105] group cursor-pointer interactive-el floating-widget  transition-all duration-[2500ms] ease-in-out origin-bottom-right">
         <div id="chat-balloon-inner" class="relative bg-simbionBlue  text-lightText px-3 py-1.5 rounded-xl  group-hover:scale-105  transition-all duration-300 flex items-center gap-1.5 border border-white/10">
             <div id="chat-balloon-tail" class="absolute -bottom-1.5 right-7 w-2.5 h-2.5 bg-simbionBlue  border-r border-b border-white/10 transform rotate-45 pointer-events-none  transition-all duration-300"></div>
             <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0"></span>
@@ -2109,15 +2109,13 @@
                 updateHeaderSceneState(window.pageYOffset);
 
                 const cb = document.getElementById('chat-balloon');
-                const fb = document.getElementById('footer-bottom');
-                if (cb && fb) {
-                    const fbRect = fb.getBoundingClientRect();
-                    // If the footer is visible in the viewport (its top is less than the window height + a small buffer)
-                    if (fbRect.top < window.innerHeight) {
-                        // Move chat balloon up by 60px to avoid the footer
-                        cb.style.transform = 'translateY(-60px)';
+                const contactSec = document.getElementById('contact');
+                if (cb && contactSec) {
+                    const contactRect = contactSec.getBoundingClientRect();
+                    if (contactRect.top < window.innerHeight * 0.75) {
+                        cb.style.bottom = '50%';
                     } else {
-                        cb.style.transform = 'translateY(0)';
+                        cb.style.bottom = '';
                     }
                 }
             }, { passive: true });

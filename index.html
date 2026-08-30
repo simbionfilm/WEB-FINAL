@@ -2757,7 +2757,11 @@
                 gameOverlay.classList.remove('hidden');
                 gameOverlay.classList.add('flex');
                 document.body.style.overflow = 'hidden';
+                if (document.activeElement && document.activeElement.blur) {
+                    document.activeElement.blur();
+                }
                 if (window.lenis) window.lenis.stop();
+                cancelAnimationFrame(gameLoopId);
                 renderLeaderboard();
                 showStartScreen();
             }
@@ -3094,7 +3098,8 @@
             });
 
             window.addEventListener('keydown', (e) => {
-                if (e.code === 'Space') {
+                const isSpace = e.code === 'Space' || e.key === ' ' || e.keyCode === 32;
+                if (isSpace) {
                     if (!isGameActive) {
                         e.preventDefault();
                         openGame();
@@ -3103,27 +3108,32 @@
                         e.preventDefault();
                         if (gameState === 'ready') {
                             tryStartGame();
-                        } else if (gameState === 'gameover') {
-                            showStartScreen();
-                            tryStartGame();
-                        } else if (gameState === 'win') {
-                            if (!hasSavedScore && nameInputWin.value.trim() !== '') saveScore(nameInputWin, winInputArea);
+                        } else if (gameState === 'gameover' || gameState === 'win') {
+                            if (gameState === 'win' && !hasSavedScore && nameInputWin.value.trim() !== '') {
+                                saveScore(nameInputWin, winInputArea);
+                            }
                             showStartScreen();
                             tryStartGame();
                         }
                     }
                 }
-                if (e.code === 'Escape' && isGameActive) {
+                if ((e.code === 'Escape' || e.key === 'Escape') && isGameActive) {
                     closeGame();
                 }
                 
-                if (isGameActive && (e.code === 'ArrowLeft' || e.code === 'KeyA')) { if(gameState === 'playing') e.preventDefault(); keys.ArrowLeft = true; }
-                if (isGameActive && (e.code === 'ArrowRight' || e.code === 'KeyD')) { if(gameState === 'playing') e.preventDefault(); keys.ArrowRight = true; }
+                if (isGameActive && (e.code === 'ArrowLeft' || e.key === 'ArrowLeft' || e.code === 'KeyA' || e.key === 'a' || e.key === 'A')) { 
+                    if(gameState === 'playing') e.preventDefault(); 
+                    keys.ArrowLeft = true; 
+                }
+                if (isGameActive && (e.code === 'ArrowRight' || e.key === 'ArrowRight' || e.code === 'KeyD' || e.key === 'd' || e.key === 'D')) { 
+                    if(gameState === 'playing') e.preventDefault(); 
+                    keys.ArrowRight = true; 
+                }
             });
             
             window.addEventListener('keyup', (e) => {
-                if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.ArrowLeft = false;
-                if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.ArrowRight = false;
+                if (e.code === 'ArrowLeft' || e.key === 'ArrowLeft' || e.code === 'KeyA' || e.key === 'a' || e.key === 'A') keys.ArrowLeft = false;
+                if (e.code === 'ArrowRight' || e.key === 'ArrowRight' || e.code === 'KeyD' || e.key === 'd' || e.key === 'D') keys.ArrowRight = false;
             });
 
             let isDragging = false;

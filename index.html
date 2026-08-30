@@ -2579,6 +2579,7 @@
             const nameInputWin = document.getElementById('player-name-input-win');
             const winInputArea = document.getElementById('game-win-input-area');
             const scoreList = document.getElementById('score-list');
+            const scorePanel = document.getElementById('scoreboard-panel');
             
             let isGameActive = false;
             let gameState = 'ready'; // ready, playing, gameover, win
@@ -3083,6 +3084,7 @@
             });
             
             if (document.getElementById('start-btn')) document.getElementById('start-btn').addEventListener('click', tryStartGame);
+            if (startMsg) startMsg.addEventListener('click', tryStartGame);
             
             if (document.getElementById('restart-btn')) document.getElementById('restart-btn').addEventListener('click', () => {
                 showStartScreen();

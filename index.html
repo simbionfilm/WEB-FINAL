@@ -492,18 +492,18 @@
                 <div class="speed-line" style="left: 85%; animation-duration: 0.7s"></div>
             </div>
             
-            <!-- Invincible Shield Visual Vignette Overlay & HUD -->
+            <!-- Timer Display (Original Position Top Left) -->
+            <div class="absolute top-14 md:top-6 left-6 font-mono text-base md:text-xl text-white font-black z-30 tracking-wider" id="game-score">TIME: 0.00s</div>
+
+            <!-- Collected Word (7 Horizontal Solid Blue Boxes Centered at Top) -->
+            <div id="game-word" class="absolute top-14 md:top-6 left-1/2 -translate-x-1/2 z-30 flex flex-row flex-nowrap items-center justify-center gap-1.5 md:gap-2 pointer-events-none" style="left: 50%; transform: translateX(-50%);"></div>
+            
+            <!-- Invincible Shield Visual Vignette Overlay & HUD (Positioned Cleanly Below Center Boxes) -->
             <div id="slowmo-overlay" class="absolute inset-0 pointer-events-none z-15 opacity-0 transition-opacity duration-300 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,10,194,0.3)_100%)]"></div>
-            <div id="slowmo-hud" class="absolute top-28 md:top-20 left-1/2 -translate-x-1/2 font-mono text-[10px] md:text-xs text-white/90 font-semibold bg-[#000AC2]/60 border border-white/20 backdrop-blur-sm px-2.5 py-0.5 rounded-full z-35 tracking-wider uppercase hidden items-center gap-1.5 shadow-[0_0_10px_rgba(255,255,255,0.4)] opacity-85 transition-opacity pointer-events-none">
+            <div id="slowmo-hud" class="absolute top-26 md:top-20 left-1/2 -translate-x-1/2 font-mono text-[10px] md:text-xs text-white/90 font-semibold bg-[#000AC2]/60 border border-white/20 backdrop-blur-sm px-2.5 py-0.5 rounded-full z-35 tracking-wider uppercase hidden items-center gap-1.5 shadow-[0_0_10px_rgba(255,255,255,0.4)] opacity-85 transition-opacity pointer-events-none">
                 <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
                 <span id="slowmo-countdown-text">SHIELD: 5.0s</span>
             </div>
-
-            <!-- Timer Display -->
-            <div class="absolute top-14 md:top-6 left-6 font-mono text-base md:text-xl text-white font-black z-30 tracking-wider" id="game-score">TIME: 0.00s</div>
-            
-            <!-- Collected Word (7 Horizontal Solid Blue Boxes in Row at Top Right) -->
-            <div class="absolute top-14 md:top-6 right-6 z-30 flex flex-row flex-nowrap items-center gap-1 md:gap-1.5" id="game-word"></div>
             
             <div id="game-start-msg" class="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a]/95 z-40 pointer-events-auto px-4" style="cursor: auto;">
                 <div class="flex items-center gap-6 mb-8 text-lightText/80">

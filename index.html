@@ -493,17 +493,17 @@
             </div>
             
             <!-- Invincible Shield Visual Vignette Overlay & HUD -->
-            <div id="slowmo-overlay" class="absolute inset-0 pointer-events-none z-15 opacity-0 transition-opacity duration-300 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,10,194,0.35)_100%)]"></div>
-            <div id="slowmo-hud" class="absolute top-20 md:top-14 left-1/2 -translate-x-1/2 font-mono text-xs md:text-sm text-white font-bold bg-[#000AC2]/90 border border-white/40 backdrop-blur-md px-3.5 py-1 rounded-full z-35 tracking-widest uppercase hidden items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.8)]">
-                <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-                <span>INVINCIBLE SHIELD (3S)</span>
+            <div id="slowmo-overlay" class="absolute inset-0 pointer-events-none z-15 opacity-0 transition-opacity duration-300 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,10,194,0.3)_100%)]"></div>
+            <div id="slowmo-hud" class="absolute top-28 md:top-20 left-1/2 -translate-x-1/2 font-mono text-[10px] md:text-xs text-white/90 font-semibold bg-[#000AC2]/60 border border-white/20 backdrop-blur-sm px-2.5 py-0.5 rounded-full z-35 tracking-wider uppercase hidden items-center gap-1.5 shadow-[0_0_10px_rgba(255,255,255,0.4)] opacity-85 transition-opacity pointer-events-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                <span id="slowmo-countdown-text">SHIELD: 5.0s</span>
             </div>
 
             <!-- Timer Display -->
             <div class="absolute top-14 md:top-6 left-6 font-mono text-base md:text-xl text-white font-black z-30 tracking-wider" id="game-score">TIME: 0.00s</div>
             
-            <!-- Collected Word -->
-            <div class="absolute top-6 md:top-6 left-1/2 -translate-x-1/2 font-mono text-xl md:text-4xl text-[#000AC2] font-black z-30 tracking-[0.3em] drop-shadow-md" id="game-word">_ _ _ _ _ _ _</div>
+            <!-- Collected Word (7 Horizontal Solid Blue Boxes in Row at Top Right) -->
+            <div class="absolute top-14 md:top-6 right-6 z-30 flex flex-row flex-nowrap items-center gap-1 md:gap-1.5" id="game-word"></div>
             
             <div id="game-start-msg" class="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a]/95 z-40 pointer-events-auto px-4" style="cursor: auto;">
                 <div class="flex items-center gap-6 mb-8 text-lightText/80">

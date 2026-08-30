@@ -492,6 +492,13 @@
                 <div class="speed-line" style="left: 85%; animation-duration: 0.7s"></div>
             </div>
             
+            <!-- Slow Motion Visual Vignette Overlay & HUD -->
+            <div id="slowmo-overlay" class="absolute inset-0 pointer-events-none z-15 opacity-0 transition-opacity duration-300 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,10,194,0.35)_100%)]"></div>
+            <div id="slowmo-hud" class="absolute top-20 md:top-14 left-1/2 -translate-x-1/2 font-mono text-xs md:text-sm text-white font-bold bg-[#000AC2]/80 border border-white/30 backdrop-blur-md px-3 py-1 rounded-full z-35 tracking-widest uppercase hidden items-center gap-2 shadow-[0_0_15px_rgba(255,255,255,0.6)]">
+                <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                <span>SLOW-MO ACTIVE (3S)</span>
+            </div>
+
             <!-- Timer Display -->
             <div class="absolute top-14 md:top-6 left-6 font-mono text-base md:text-xl text-white font-black z-30 tracking-wider" id="game-score">TIME: 0.00s</div>
             
@@ -602,6 +609,19 @@
         }
         .animate-float-letter {
             animation: floatLetterAnim 2s ease-in-out infinite;
+        }
+        @keyframes filmAwardGlowAnim {
+            0%, 100% {
+                filter: drop-shadow(0 0 12px rgba(255, 255, 255, 1)) drop-shadow(0 0 24px rgba(255, 255, 255, 0.8)) brightness(1.2);
+                transform: scale(1) translateY(0);
+            }
+            50% {
+                filter: drop-shadow(0 0 20px rgba(255, 255, 255, 1)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.9)) brightness(1.4);
+                transform: scale(1.08) translateY(-6px);
+            }
+        }
+        .animate-film-award-glow {
+            animation: filmAwardGlowAnim 1.8s ease-in-out infinite;
         }
     </style>
 
@@ -2798,6 +2818,16 @@
                 obstacleCounter = 0;
                 hasSavedScore = false;
                 keys = { ArrowLeft: false, ArrowRight: false };
+                
+                // Clear any active slow motion
+                if (slowMoTimer) clearTimeout(slowMoTimer);
+                isSlowMoActive = false;
+                if (slowMoOverlay) slowMoOverlay.style.opacity = '0';
+                if (slowMoHud) {
+                    slowMoHud.classList.add('hidden');
+                    slowMoHud.classList.remove('flex');
+                }
+
                 updateSpeedByLevel();
                 updateScore();
                 updateWordDisplay();
@@ -2847,35 +2877,83 @@
                 gameLoopId = requestAnimationFrame(updateGame);
             }
 
+            // 10 Exact Film Equipment Icons from Flaticon (all converted to clean, high-contrast white vector SVGs)
             const equipmentSVGs = [
-                // 1. Films icon (Bharat Icons - Flaticon)
-                '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full drop-shadow"><rect x="2" y="2" width="20" height="20" rx="2.5"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5"/></svg>',
-                // 2. Clapper icon (Boris farias - Flaticon)
-                '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full drop-shadow"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M2 10h20M7 4l3 6M13 4l3 6M19 4l2 4"/></svg>',
-                // 3. Video camera icon (Hilmy Abiyyu A. - Flaticon)
-                '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full drop-shadow"><path d="m16 10 6-3.5v11L16 14v-4z"/><rect x="2" y="6" width="14" height="12" rx="2.5"/><circle cx="7.5" cy="12" r="2.5"/></svg>',
-                // 4. Director chair icon (Magnific - Flaticon)
-                '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full drop-shadow"><path d="M5 4h14v7H5z"/><path d="M4 11h16v3H4z"/><path d="M6 14l12 8M18 14L6 22"/><path d="M6 18h12"/></svg>',
-                // 5. Studio lighting icon (Nueng_wana - Flaticon)
-                '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full drop-shadow"><path d="M12 2a7 7 0 0 0-7 7c0 2.4 1.2 4.5 3 5.7V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.3c1.8-1.2 3-3.3 3-5.7a7 7 0 0 0-7-7z"/><path d="M10 22h4M6 9H2M22 9h-4M5 4L2.5 1.5M19 4l2.5-2.5"/></svg>',
-                // 6. Film roll icon (Luvdat - Flaticon)
-                '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full drop-shadow"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="6" r="1.5" fill="white"/><circle cx="12" cy="18" r="1.5" fill="white"/><circle cx="6" cy="12" r="1.5" fill="white"/><circle cx="18" cy="12" r="1.5" fill="white"/></svg>'
+                // 1. Camera Crane (camera-crane.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M460.6 86.8L281.3 22.9c-7.3-2.6-15.3.8-18.4 7.9L229.4 104c-3.1 7.2.2 15.4 7.5 18.2l49.2 18.8-74.8 171.8-65.7-24.8c-7.3-2.8-15.5.4-18.6 7.6l-13.6 31.9c-3.1 7.2.2 15.4 7.5 18.2l20.4 7.7-93.5 106.3c-5 5.7-4.4 14.3 1.3 19.3 2.6 2.3 5.9 3.5 9.2 3.5 3.8 0 7.6-1.5 10.4-4.5L145 393.7l64.6 24.4-19.6 45.9c-3.1 7.2.2 15.4 7.5 18.2 1.8.7 3.7 1 5.5 1 5.7 0 11-3.4 13.1-9l22.7-53.1 82.2 31.1c1.8.7 3.7 1 5.5 1 5.7 0 11-3.4 13.1-9 3.1-7.2-.2-15.4-7.5-18.2l-79.1-29.9 74.8-171.8 49.2 18.8c1.8.7 3.7 1 5.5 1 5.7 0 11-3.4 13.1-9l33.5-73.2c3.1-7.2-.2-15.4-7.5-18.2l-49.2-18.8 33.5-73.2 49.2 18.8c1.8.7 3.7 1 5.5 1 5.7 0 11-3.4 13.1-9l13.5-31.9c3.1-7.2-.2-15.4-7.5-18.2zM366.4 213.3c-44.2 0-80 35.8-80 80s35.8 80 80 80 80-35.8 80-80-35.8-80-80-80zm115.6 31.1l-43.6 29.1v39.6l43.6 29.1c10 6.7 23.6-.5 23.6-12.6v-72.6c0-12.1-13.6-19.3-23.6-12.6z"/></svg>',
+                // 2. Spotlight / Light Studio (light.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M495.6 195.4l-117-78c-10.4-6.9-24.3-5-32.5 4.5l-42.6 49.4-131-87.3c-23-15.3-54-8.8-69.3 14.2L68 149.7l-42.6-28.4c-9.7-6.5-22.9-3.9-29.4 5.8-6.5 9.7-3.9 22.9 5.8 29.4l42.6 28.4-17.1 25.7c-15.3 23-8.8 54 14.2 69.3l131 87.3-42.6 49.4c-8.2 9.5-6.3 23.4 4.1 30.3l117 78c4.3 2.9 9.2 4.3 14.1 4.3 7 0 14-3 18.4-8.8l173.8-201.3c8.9-10.4 7-25.9-4.7-33.8zM245.9 308.2l-112.3-74.9c-5.8-3.8-7.4-11.6-3.5-17.4l35.3-53 112.3 74.9-31.8 70.4z"/></svg>',
+                // 3. Clapperboard (clapperboard.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M472 208H40c-22.1 0-40 17.9-40 40v200c0 22.1 17.9 40 40 40h432c22.1 0 40-17.9 40-40V248c0-22.1-17.9-40-40-40zM503.7 136.2l-373-112.9c-21.1-6.4-43.7 5.6-50.1 26.7L67.1 91.2l395.2 119.6 14.7-47.9c6.4-21.1-5.6-43.7-26.7-50.1l53.4 23.4zM247.9 146.5l-63-19.1 25.8-84.3 63 19.1-25.8 84.3zm109.1 33l-63-19.1 25.8-84.3 63 19.1-25.8 84.3z"/></svg>',
+                // 4. Director Chair (director-chair.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M448 32H64C46.3 32 32 46.3 32 64v240c0 17.7 14.3 32 32 32h24.8l-54.2 135.5c-6.6 16.4 1.5 35.1 17.9 41.6 16.4 6.6 35.1-1.5 41.6-17.9L156.4 336h199.2l62.3 155.8c5.1 12.8 17.3 20.2 30.1 20.2 3.8 0 7.7-.7 11.5-2.2 16.4-6.6 24.5-25.2 17.9-41.6L423.2 336H448c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32zm-32 240H96V96h320v176z"/></svg>',
+                // 5. Film Making Dolly Camera (film-making.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M480 384H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h448c17.7 0 32-14.3 32-32s-14.3-32-32-32zM80 448c-26.5 0-48 21.5-48 48s21.5 48 48 48 48-21.5 48-48-21.5-48-48-48zm352 0c-26.5 0-48 21.5-48 48s21.5 48 48 48 48-21.5 48-48-21.5-48-48-48zm-16-352h-48V48c0-26.5-21.5-48-48-48H128c-26.5 0-48 21.5-48 48v48H32C14.3 96 0 110.3 0 128v176c0 17.7 14.3 32 32 32h384c17.7 0 32-14.3 32-32V128c0-17.7-14.3-32-32-32zm32 64l48-32v112l-48-32v-48z"/></svg>',
+                // 6. Film Roll / Reel (film-roll.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 448c-106 0-192-86-192-192S150 64 256 64s192 86 192 192-86 192-192 192zm0-256c-35.3 0-64 28.7-64 64s28.7 64 64 64 64-28.7 64-64-28.7-64-64-64zm0-96c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm-96 96c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm192 0c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32zm-96 96c-17.7 0-32 14.3-32 32s14.3 32 32 32 32-14.3 32-32-14.3-32-32-32z"/></svg>',
+                // 7. Studio Fresnel / Barn Door Light (photography.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M480 96h-64V48c0-26.5-21.5-48-48-48H144c-26.5 0-48 21.5-48 48v48H32C14.3 96 0 110.3 0 128v224c0 17.7 14.3 32 32 32h64v80c0 26.5 21.5 48 48 48h224c26.5 0 48-21.5 48-48v-80h64c17.7 0 32-14.3 32-32V128c0-17.7-14.3-32-32-32zm-128 320H160v-64h192v64zm48-96H112V128h288v192z"/></svg>',
+                // 8. Boom / Studio Microphone (microphone.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M467.4 340.6l-85-85c-12.5-12.5-32.8-12.5-45.3 0l-14.1 14.1-67.9-67.9 14.1-14.1c12.5-12.5 12.5-32.8 0-45.3l-85-85c-12.5-12.5-32.8-12.5-45.3 0L37.7 158.6c-48.9 48.9-48.9 128.3 0 177.3l138.4 138.4c48.9 48.9 128.3 48.9 177.3 0l114-114c12.5-12.5 12.5-32.8 0-45.3l-85-85 14.1-14.1zM294.6 429.7c-25.6 25.6-67.2 25.6-92.8 0L63.4 291.3c-25.6-25.6-25.6-67.2 0-92.8l70.7-70.7 92.8 92.8 70.7-70.7 92.8 92.8-70.7 70.7-70.7 70.7z"/></svg>',
+                // 9. Tripod Softbox Light (cinema.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M224 32h64v240h-64z"/><path d="M384 32c-35.3 0-64 28.7-64 64v128c0 35.3 28.7 64 64 64s64-28.7 64-64V96c0-35.3-28.7-64-64-64zm32 192c0 17.7-14.3 32-32 32s-32-14.3-32-32V96c0-17.7 14.3-32 32-32s32 14.3 32 32v128zM128 32C92.7 32 64 60.7 64 96v128c0 35.3 28.7 64 64 64s64-28.7 64-64V96c0-35.3-28.7-64-64-64zm32 192c0 17.7-14.3 32-32 32s-32-14.3-32-32V96c0-17.7 14.3-32 32-32s32 14.3 32 32v128zM288 304v112l104 64c15.2 9.3 20 29.2 10.7 44.4-9.3 15.2-29.2 20-44.4 10.7L256 471.5 153.7 535.1c-5.1 3.2-10.8 4.7-16.5 4.7-11.2 0-22.1-5.9-27.9-16.5-9.3-15.2-4.5-35.1 10.7-44.4L224 416V304h64z"/></svg>',
+                // 10. 35mm Movie Video Camera (video-camera.png)
+                '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full drop-shadow"><path d="M144 0C91 0 48 43 48 96s43 96 96 96 96-43 96-96-43-96-96-96zm0 128c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zm192-128c-53 0-96 43-96 96s43 96 96 96 96-43 96-96-43-96-96-96zm0 128c-17.7 0-32-14.3-32-32s14.3-32 32-32 32 14.3 32 32-14.3 32-32 32zM400 224H32c-17.7 0-32 14.3-32 32v192c0 17.7 14.3 32 32 32h368c17.7 0 32-14.3 32-32V256c0-17.7-14.3-32-32-32zm48 32l64-48v208l-64-48V256z"/></svg>'
             ];
+
+            // 11. Special Power-Up Item: Film Award (film award.png) - Glowing White Laurel & Film Roll
+            const filmAwardSVG = '<svg viewBox="0 0 512 512" fill="white" class="w-full h-full"><path d="M256 128c-70.7 0-128 57.3-128 128s57.3 128 128 128 128-57.3 128-128-57.3-128-128-128zm0 208c-44.2 0-80-35.8-80-80s35.8-80 80-80 80 35.8 80 80-35.8 80-80 80zm0-128c-26.5 0-48 21.5-48 48s21.5 48 48 48 48-21.5 48-48-21.5-48-48-48zm0 64c-8.8 0-16-7.2-16-16s7.2-16 16-16 16 7.2 16 16-7.2 16-16 16zm-160-48c0-61.9 28.5-117.2 73.1-153.2-12.7-4.4-26.4-6.8-40.6-6.8-66.3 0-120 53.7-120 120 0 45.4 25.2 84.9 62.4 105.1-4.8-20.2-7.5-41.2-7.5-62.8L96 224zm320 0c0 21.6-2.7 42.6-7.5 62.8 37.2-20.2 62.4-59.7 62.4-105.1 0-66.3-53.7-120-120-120-14.2 0-27.9 2.4-40.6 6.8 44.6 36 73.1 91.3 73.1 153.2l32.6 2.3zM96 352c16.3 47.9 50.1 87.8 94.6 112.5-22.1-14.4-40.3-34.1-52.8-57.6-18.7-35.1-24.8-74.8-21.8-113.8L96 352zm320 0l-20-58.9c3 39-3.1 78.7-21.8 113.8-12.5 23.5-30.7 43.2-52.8 57.6 44.5-24.7 78.3-64.6 94.6-112.5z"/></svg>';
+
+            // Slow Motion State Management
+            let slowMoTimer = null;
+            let isSlowMoActive = false;
+            const slowMoOverlay = document.getElementById('slowmo-overlay');
+            const slowMoHud = document.getElementById('slowmo-hud');
+
+            function triggerSlowMotion() {
+                isSlowMoActive = true;
+                if (slowMoOverlay) slowMoOverlay.style.opacity = '1';
+                if (slowMoHud) {
+                    slowMoHud.classList.remove('hidden');
+                    slowMoHud.classList.add('flex');
+                }
+
+                // White shockwave flash on screen
+                const flash = document.createElement('div');
+                flash.className = 'absolute inset-0 bg-white z-[100] pointer-events-none opacity-50 transition-opacity duration-300';
+                gameArea.appendChild(flash);
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 300);
+                }, 50);
+
+                if (slowMoTimer) clearTimeout(slowMoTimer);
+                slowMoTimer = setTimeout(() => {
+                    isSlowMoActive = false;
+                    if (slowMoOverlay) slowMoOverlay.style.opacity = '0';
+                    if (slowMoHud) {
+                        slowMoHud.classList.add('hidden');
+                        slowMoHud.classList.remove('flex');
+                    }
+                }, 3000); // 3 seconds of slow motion
+            }
 
             function createEntity() {
                 const isMobile = window.innerWidth < 768;
                 const el = document.createElement('div');
                 el.className = 'absolute z-10 flex items-center justify-center';
                 
-                const hasLetterOnScreen = entities.some(e => !e.isObstacle);
-                let spawnLetter = false;
+                const hasLetterOnScreen = entities.some(e => e.type === 'letter');
+                const hasAwardOnScreen = entities.some(e => e.type === 'award');
+                
+                let spawnType = 'obstacle'; // 'letter', 'award', 'obstacle'
 
                 if (collectedCount < targetWord.length && !hasLetterOnScreen) {
                     if (obstacleCounter >= 2) {
-                        spawnLetter = true;
+                        spawnType = 'letter';
                         obstacleCounter = 0;
                     } else if (Math.random() > 0.6) {
-                        spawnLetter = true;
+                        spawnType = 'letter';
                         obstacleCounter = 0;
                     } else {
                         obstacleCounter++;
@@ -2884,16 +2962,22 @@
                     obstacleCounter++;
                 }
 
-                let size, isObstacle;
+                // Chance to spawn Film Award glowing powerup if not spawning letter & none on screen
+                if (spawnType === 'obstacle' && !hasAwardOnScreen && Math.random() < 0.22) {
+                    spawnType = 'award';
+                }
 
-                if (spawnLetter) {
+                let size;
+
+                if (spawnType === 'letter') {
                     size = isMobile ? 64 : 80;
-                    isObstacle = false;
                     const letterToCollect = targetWord[collectedCount];
                     el.innerHTML = `<div class="text-[#000AC2] font-black font-mono w-full h-full flex items-center justify-center animate-float-letter" style="font-size: ${isMobile ? 64 : 80}px; line-height: 1;">${letterToCollect}</div>`;
+                } else if (spawnType === 'award') {
+                    size = isMobile ? 65 : 85;
+                    el.innerHTML = `<div class="w-full h-full animate-film-award-glow">${filmAwardSVG}</div>`;
                 } else {
                     size = isMobile ? 55 : 85; 
-                    isObstacle = true;
                     el.innerHTML = `<div class="w-full h-full animate-float-obstacle">${equipmentSVGs[Math.floor(Math.random() * equipmentSVGs.length)]}</div>`;
                 }
                 
@@ -2907,12 +2991,12 @@
                 el.style.left = x + 'px';
                 el.style.top = y + 'px';
                 
-                if (isObstacle) {
+                if (spawnType === 'obstacle') {
                     el.style.transform = `rotate(${Math.random() * 360}deg)`;
                 }
                 
                 gameArea.appendChild(el);
-                entities.push({ el, x, y, size: size, isObstacle: isObstacle });
+                entities.push({ el, x, y, size: size, type: spawnType });
             }
 
             function updateGame() {
@@ -2921,6 +3005,7 @@
                 elapsedTime = (Date.now() - startTime) / 1000;
                 updateScore();
 
+                // Player speed remains 100% normal & responsive regardless of slow-motion
                 if (keys.ArrowLeft) targetPlayerX -= playerSpeed;
                 if (keys.ArrowRight) targetPlayerX += playerSpeed;
 
@@ -2933,8 +3018,13 @@
 
                 frameCount++;
                 
+                // Slow motion reduces entity fall speed and spawn frequency by 3x (33% speed)
+                const currentFallSpeed = isSlowMoActive ? (fallSpeed * 0.35) : fallSpeed;
+                
                 const baseRate = window.innerWidth < 768 ? 40 : 45;
-                const spawnRate = Math.max(12, Math.floor(baseRate - (fallSpeed * 1.5)));
+                const spawnRateMultiplier = isSlowMoActive ? 2.5 : 1;
+                const spawnRate = Math.max(12, Math.floor((baseRate - (fallSpeed * 1.5)) * spawnRateMultiplier));
+                
                 if (frameCount % spawnRate === 0) {
                     createEntity();
                 }
@@ -2953,7 +3043,7 @@
                 
                 for (let i = 0; i < entities.length; i++) {
                     let ent = entities[i];
-                    ent.y -= fallSpeed; 
+                    ent.y -= currentFallSpeed; 
                     ent.el.style.top = ent.y + 'px';
                     
                     const oRect = ent.el.getBoundingClientRect();
@@ -2964,10 +3054,16 @@
                     const oBottom = oRect.bottom - oShrink;
 
                     if (pLeft < oRight && pRight > oLeft && pTop < oBottom && pBottom > oTop) {
-                        if (ent.isObstacle) {
+                        if (ent.type === 'obstacle') {
                             gameOver();
                             return;
-                        } else {
+                        } else if (ent.type === 'award') {
+                            // COLLECT FILM AWARD: TRIGGER 3-SECOND SLOW MOTION
+                            ent.el.remove();
+                            entities.splice(i, 1);
+                            i--;
+                            triggerSlowMotion();
+                        } else if (ent.type === 'letter') {
                             ent.el.remove();
                             entities.splice(i, 1);
                             i--;

@@ -103,6 +103,17 @@ function startSimbionApp() {
     if (window.__simbionInitialized) return;
     window.__simbionInitialized = true;
 
+    // Register Service Worker for free instant local caching of 3D frames & assets
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then((reg) => {
+                console.log('[Simbion Cache Engine] ServiceWorker active for zero-latency asset caching:', reg.scope);
+            }).catch((err) => {
+                console.warn('[Simbion Cache Engine] ServiceWorker notice:', err);
+            });
+        });
+    }
+
     const isTouchDevice = window.matchMedia("(pointer: coarse), (hover: none), (max-width: 1024px)").matches;
 
     // Shooting Preloader Logic

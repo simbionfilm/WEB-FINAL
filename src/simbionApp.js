@@ -914,16 +914,24 @@ function startSimbionApp() {
         visibilityObserver.observe(weAreSection);
         if (statementSection) visibilityObserver.observe(statementSection);
 
+        // Configure GSAP ScrollTrigger for iOS Safari address bar resize immunity
+        if (window.ScrollTrigger) {
+            ScrollTrigger.config({ ignoreMobileResize: true });
+        }
+
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || !!window.gestureEvent || !!window.WebKitPlaybackTargetAvailabilityEvent;
+        const canvasContextOptions = { alpha: true, desynchronized: !isSafari };
+
         // ==========================================
         // 1. CANVAS 1: ABOUT SECTION
         // ==========================================
-        const ctxAbout = aboutCanvas.getContext('2d', { alpha: true, desynchronized: true });
+        const ctxAbout = aboutCanvas.getContext('2d', canvasContextOptions);
         let aboutWidth = window.innerWidth;
         let aboutHeight = window.innerHeight;
 
         function resizeAbout() {
             if (!ctxAbout) return;
-            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2.0);
             
             aboutWidth = aboutSection.clientWidth || window.innerWidth;
             aboutHeight = aboutSection.clientHeight || window.innerHeight;
@@ -952,8 +960,6 @@ function startSimbionApp() {
 
             const isMobile = window.innerWidth < 768;
             ctxAbout.clearRect(0, 0, aboutWidth, aboutHeight);
-            ctxAbout.imageSmoothingEnabled = true;
-            ctxAbout.imageSmoothingQuality = "high";
 
             const currentX = aboutWidth * ((isMobile ? 0.60 : 0.64) - (0.12 * p));
             const startY = aboutHeight * 0.45;
@@ -972,6 +978,10 @@ function startSimbionApp() {
             const renderH = nativeH * fitFactor;
 
             ctxAbout.save();
+            ctxAbout.imageSmoothingEnabled = true;
+            if ('imageSmoothingQuality' in ctxAbout) {
+                ctxAbout.imageSmoothingQuality = "high";
+            }
             ctxAbout.translate(currentX, currentY);
             ctxAbout.rotate(rotationRad);
             ctxAbout.drawImage(img, -renderW / 2, -renderH / 2, renderW, renderH);
@@ -1001,13 +1011,13 @@ function startSimbionApp() {
         // ==========================================
         // 2. CANVAS 2: WE ARE WHAT WE'VE MADE SECTION
         // ==========================================
-        const ctxWeAre = weAreCanvas.getContext('2d', { alpha: true, desynchronized: true });
+        const ctxWeAre = weAreCanvas.getContext('2d', canvasContextOptions);
         let weAreWidth = window.innerWidth;
         let weAreHeight = window.innerHeight;
 
         function resizeWeAre() {
             if (!ctxWeAre) return;
-            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2.0);
             weAreWidth = weAreSection.clientWidth || window.innerWidth;
             weAreHeight = weAreSection.clientHeight || window.innerHeight;
 
@@ -1035,8 +1045,6 @@ function startSimbionApp() {
 
             const isMobile = window.innerWidth < 768;
             ctxWeAre.clearRect(0, 0, weAreWidth, weAreHeight);
-            ctxWeAre.imageSmoothingEnabled = true;
-            ctxWeAre.imageSmoothingQuality = "high";
 
             const scaleFactor = Math.min(1, p * 2.0);
             const currentX = weAreWidth * (0.58 - 0.08 * scaleFactor);
@@ -1052,6 +1060,10 @@ function startSimbionApp() {
             const renderH = nativeH * fitFactor;
 
             ctxWeAre.save();
+            ctxWeAre.imageSmoothingEnabled = true;
+            if ('imageSmoothingQuality' in ctxWeAre) {
+                ctxWeAre.imageSmoothingQuality = "high";
+            }
             ctxWeAre.translate(currentX, currentY);
             ctxWeAre.rotate(rotationRad);
             ctxWeAre.drawImage(img, -renderW / 2, -renderH / 2, renderW, renderH);
@@ -1085,13 +1097,13 @@ function startSimbionApp() {
         // ==========================================
         // 3. CANVAS 3: STATEMENT SECTION
         // ==========================================
-        const ctxStatement = statementCanvas ? statementCanvas.getContext('2d', { alpha: true, desynchronized: true }) : null;
+        const ctxStatement = statementCanvas ? statementCanvas.getContext('2d', canvasContextOptions) : null;
         let statementWidth = window.innerWidth;
         let statementHeight = window.innerHeight;
 
         function resizeStatement() {
             if (!ctxStatement || !statementCanvas || !statementSection) return;
-            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.5 : 2.0);
             statementWidth = statementSection.clientWidth || window.innerWidth;
             statementHeight = statementSection.clientHeight || window.innerHeight;
 
@@ -1119,8 +1131,6 @@ function startSimbionApp() {
 
             const isMobile = window.innerWidth < 768;
             ctxStatement.clearRect(0, 0, statementWidth, statementHeight);
-            ctxStatement.imageSmoothingEnabled = true;
-            ctxStatement.imageSmoothingQuality = "high";
 
             const baseScale = isMobile ? 0.35 : 0.40;
             const scaleFactor = Math.min(1, p * 2.0);
@@ -1137,6 +1147,10 @@ function startSimbionApp() {
             let renderW = renderH * aspect;
 
             ctxStatement.save();
+            ctxStatement.imageSmoothingEnabled = true;
+            if ('imageSmoothingQuality' in ctxStatement) {
+                ctxStatement.imageSmoothingQuality = "high";
+            }
             ctxStatement.translate(currentX, currentY);
             ctxStatement.rotate(rotationRad);
             ctxStatement.globalCompositeOperation = "destination-over";
@@ -1168,7 +1182,21 @@ function startSimbionApp() {
             });
         }
 
+        let lastWinW = window.innerWidth;
+        let lastWinH = window.innerHeight;
+
         window.addEventListener('resize', () => {
+            const curW = window.innerWidth;
+            const curH = window.innerHeight;
+
+            // Prevent mobile Safari address bar collapse/expand from triggering canvas buffer re-allocations
+            if (isTouchDevice && curW === lastWinW && Math.abs(curH - lastWinH) < 120) {
+                return;
+            }
+
+            lastWinW = curW;
+            lastWinH = curH;
+
             resizeAbout();
             resizeWeAre();
             if (statementCanvas) resizeStatement();

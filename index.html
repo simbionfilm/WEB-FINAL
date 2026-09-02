@@ -89,6 +89,18 @@
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
             cursor: none !important;
+            isolation: isolate;
+        }
+
+        button, input, select, textarea {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .safari-h-screen {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            min-height: 100dvh;
         }
 
         a, button, input, select, textarea, .interactive-el {

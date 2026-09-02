@@ -47,6 +47,12 @@
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
         html, body {
@@ -99,6 +105,13 @@
                 opacity: 0 !important;
                 pointer-events: none !important;
             }
+        }
+
+        canvas {
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
         }
 
         ::selection {

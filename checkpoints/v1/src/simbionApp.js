@@ -2879,7 +2879,7 @@ function startSimbionApp() {
 
             for (let r = -1; r <= 1; r++) {
                 const rowEl = document.createElement('div');
-                rowEl.className = 'absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none';
+                rowEl.className = 'absolute top-0 left-0 w-full h-full flex justify-center items-center';
                 rowEl.style.transformStyle = 'preserve-3d';
                 rowEl.style.transform = `translateY(${r * rowHeight}px)`;
                 
@@ -2892,7 +2892,7 @@ function startSimbionApp() {
                     const finalAngle = baseAngle + angleOffset;
                     
                     const el = document.createElement('div');
-                    el.className = 'absolute top-0 left-0 w-full h-full flex justify-center items-center bts-float pointer-events-none';
+                    el.className = 'absolute top-0 left-0 w-full h-full flex justify-center items-center bts-float';
                     
                     el.style.transform = `rotateY(${finalAngle}deg) translateZ(${radius}px)`;
                     el.style.backfaceVisibility = 'visible';
@@ -2921,10 +2921,13 @@ function startSimbionApp() {
                         img.onload = applyImgSize;
                     }
 
-                    // KINETIC HOVER EFFECT: scale-150 and bouncy transition via CSS
-                    img.className = "rounded-none opacity-100 cursor-pointer bts-card-optimized shadow-md object-contain pointer-events-auto";
+                    // KINETIC HOVER EFFECT: scale-150 and bouncy transition
+                    img.className = "rounded-none opacity-100 hover:scale-150 cursor-pointer bts-card-optimized shadow-md hover:shadow-xl object-contain";
                     img.style.maxWidth = `${imgWidth}px`;
                     img.style.maxHeight = `${isMobile ? 68 : 110}px`;
+                    img.style.transition = "transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)"; 
+                    img.style.transform = "translateZ(0)"; 
+                    img.style.willChange = "transform";
                     
                     el.appendChild(img);
                     rowEl.appendChild(el);
@@ -2938,27 +2941,19 @@ function startSimbionApp() {
             
             let baseRotation = 0;
             let scrollRotation = 0;
-            let scrollSpinBoost = 0;
             const minBtsFrame = 76; // ezgif-frame-077.png (0-indexed: 76)
             const maxBtsFrame = 243; // ezgif-frame-244.png (0-indexed: 243)
             let autoPingPongFrame = maxBtsFrame;
             let autoPingPongDirection = -1; // Start by playing from 244 down to 077
             const autoSpeed = 0.5; // Smooth automatic ping-pong speed (~60fps)
             
-            // Smooth ScrollTrigger-driven rotation that starts exactly when the carousel enters view
             ScrollTrigger.create({
-                trigger: "#bts-carousel-ring",
-                start: "top 85%",
-                end: "bottom 15%",
-                scrub: isTouchDevice ? 0.3 : 0.6,
+                trigger: "#the-soul",
+                start: "top bottom",
+                end: "bottom top",
+                scrub: isTouchDevice ? 0.25 : 0.5,
                 onUpdate: (self) => {
-                    scrollRotation = self.progress * 720; // 2 full spins when scrolling through carousel
-                    if (typeof self.getVelocity === 'function') {
-                        const v = self.getVelocity();
-                        if (Math.abs(v) > 15) {
-                            scrollSpinBoost = Math.max(-8, Math.min(8, v * 0.004));
-                        }
-                    }
+                    scrollRotation = self.progress * 360; 
                 }
             });
             
@@ -2972,25 +2967,15 @@ function startSimbionApp() {
                     return;
                 }
 
-                // Smooth idle auto-rotation
-                baseRotation -= 0.12; 
-                
-                // Natural deceleration from scroll impulse
-                if (Math.abs(scrollSpinBoost) > 0.01) {
-                    baseRotation -= scrollSpinBoost;
-                    scrollSpinBoost *= 0.94;
-                }
-                
-                const currentTotalRot = baseRotation + scrollRotation;
+                baseRotation -= 0.10; 
                 
                 rows.forEach(row => {
-                    const totalRotation = currentTotalRot * row.dir;
+                    const totalRotation = (baseRotation + scrollRotation) * row.dir;
                     row.el.style.transform = `translateY(${row.y}px) rotateY(${totalRotation.toFixed(2)}deg)`;
                 });
                 
-                // AUTOMATIC PING-PONG 3D SEQUENCE LOOP with dynamic speed response
-                const speedFactor = 1 + Math.min(2.0, Math.abs(scrollSpinBoost) * 0.5);
-                autoPingPongFrame += autoSpeed * autoPingPongDirection * speedFactor;
+                // AUTOMATIC PING-PONG 3D SEQUENCE LOOP (244.png <-> 077.png)
+                autoPingPongFrame += autoSpeed * autoPingPongDirection;
                 if (autoPingPongFrame >= maxBtsFrame) {
                     autoPingPongFrame = maxBtsFrame;
                     autoPingPongDirection = -1;
@@ -3025,7 +3010,7 @@ function startSimbionApp() {
                 depthFrameCounter = (depthFrameCounter + 1) % 3;
                 if (depthFrameCounter === 0) {
                     allItems.forEach(item => {
-                        const currentRingRot = currentTotalRot * item.dir;
+                        const currentRingRot = (baseRotation + scrollRotation) * item.dir;
                         const globalAngle = (item.angle + currentRingRot) % 360;
                         const rad = globalAngle * Math.PI / 180;
                         const z = Math.cos(rad); 

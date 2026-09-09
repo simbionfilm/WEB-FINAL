@@ -2853,13 +2853,14 @@ function startSimbionApp() {
             const allItems = []; 
             
             // 1. ADD CENTER 3D CANVAS inside the ring
-            // It sits at Z=0, meaning images will orbit around it!
+            // It sits at Z=0, meaning images will orbit around it with proper depth!
             const center3DContainer = document.createElement('div');
             center3DContainer.className = 'absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none';
             center3DContainer.style.transformStyle = 'preserve-3d';
+            center3DContainer.style.zIndex = Math.round(radius + 10);
             
             const centerCanvas = document.createElement('canvas');
-            const cSize = isMobile ? 360 : 600; // CSS display size
+            const cSize = isMobile ? 560 : 1000; // CSS display size enlarged for grand 3D presence
             const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
             centerCanvas.width = Math.floor(cSize * dpr);
             centerCanvas.height = Math.floor(cSize * dpr);
@@ -2881,7 +2882,6 @@ function startSimbionApp() {
                 const rowEl = document.createElement('div');
                 rowEl.className = 'absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none';
                 rowEl.style.transformStyle = 'preserve-3d';
-                rowEl.style.transform = `translateY(${r * rowHeight}px)`;
                 
                 const dir = r === 0 ? -1 : 1;
 
@@ -2893,14 +2893,17 @@ function startSimbionApp() {
                     
                     const el = document.createElement('div');
                     el.className = 'absolute top-0 left-0 w-full h-full flex justify-center items-center bts-float pointer-events-none';
+                    el.style.transformStyle = 'preserve-3d';
+                    el.style.willChange = 'transform, z-index';
                     
-                    el.style.transform = `rotateY(${finalAngle}deg) translateZ(${radius}px)`;
-                    el.style.backfaceVisibility = 'visible';
+                    const card = document.createElement('div');
+                    card.className = "bts-laminate-card cursor-pointer pointer-events-auto opacity-100";
                     
                     const img = document.createElement('img');
                     img.src = `https://emjwdjdzbatvzljsouav.supabase.co/storage/v1/object/public/web%20asset/bts/${imgIndex}.webp`;
                     img.onerror = () => { img.src = `${imgIndex}.webp`; };
                     img.alt = `BTS ${imgIndex}`;
+                    img.className = "rounded-none object-contain block";
                     
                     const applyImgSize = () => {
                         if (img.naturalHeight && img.naturalWidth) {
@@ -2921,50 +2924,97 @@ function startSimbionApp() {
                         img.onload = applyImgSize;
                     }
 
-                    // KINETIC HOVER EFFECT: scale-150 and bouncy transition via CSS
-                    img.className = "rounded-none opacity-100 cursor-pointer bts-card-optimized shadow-md object-contain pointer-events-auto";
                     img.style.maxWidth = `${imgWidth}px`;
                     img.style.maxHeight = `${isMobile ? 68 : 110}px`;
                     
-                    el.appendChild(img);
+                    card.appendChild(img);
+                    el.appendChild(card);
                     rowEl.appendChild(el);
                     
-                    allItems.push({ el, img, angle: finalAngle, dir });
+                    allItems.push({ el, card, baseAngle: finalAngle, dir, rowY: r * rowHeight });
                 }
                 
                 btsRing.appendChild(rowEl);
                 rows.push({ el: rowEl, dir, y: r * rowHeight }); 
             }
             
-            let baseRotation = 0;
-            let scrollRotation = 0;
-            let scrollSpinBoost = 0;
-            const minBtsFrame = 76; // ezgif-frame-077.png (0-indexed: 76)
-            const maxBtsFrame = 243; // ezgif-frame-244.png (0-indexed: 243)
-            let autoPingPongFrame = maxBtsFrame;
-            let autoPingPongDirection = -1; // Start by playing from 244 down to 077
-            const autoSpeed = 0.5; // Smooth automatic ping-pong speed (~60fps)
-            
-            // Smooth ScrollTrigger-driven rotation that starts exactly when the carousel enters view
-            ScrollTrigger.create({
-                trigger: "#bts-carousel-ring",
-                start: "top 85%",
-                end: "bottom 15%",
-                scrub: isTouchDevice ? 0.3 : 0.6,
-                onUpdate: (self) => {
-                    scrollRotation = self.progress * 720; // 2 full spins when scrolling through carousel
-                    if (typeof self.getVelocity === 'function') {
-                        const v = self.getVelocity();
-                        if (Math.abs(v) > 15) {
-                            scrollSpinBoost = Math.max(-8, Math.min(8, v * 0.004));
-                        }
+            // BTS Dedicated 360 Sequence Loader (Frames 001 - 212)
+            const bts360TotalFrames = 212;
+            const bts360Images = new Array(bts360TotalFrames);
+            const bts360BaseUrl = "https://emjwdjdzbatvzljsouav.supabase.co/storage/v1/object/public/web%20asset/360%203d/ezgif-frame-";
+
+            function loadBts360Frame(idx) {
+                if (idx < 1 || idx > bts360TotalFrames) return;
+                if (bts360Images[idx - 1]) return;
+                
+                const img = new Image();
+                img.decoding = "async";
+                img.crossOrigin = "anonymous";
+                const p3 = String(idx).padStart(3, '0');
+                img.src = `${bts360BaseUrl}${p3}.webp`;
+                img.onload = () => {
+                    bts360Images[idx - 1] = img;
+                };
+            }
+
+            // High-speed concurrent frame preloader
+            for (let i = 1; i <= bts360TotalFrames; i += 2) {
+                loadBts360Frame(i);
+            }
+            setTimeout(() => {
+                for (let i = 1; i <= bts360TotalFrames; i++) {
+                    loadBts360Frame(i);
+                }
+            }, 100);
+
+            function getNearestBts360Frame(targetIdx) {
+                const clamped = Math.max(1, Math.min(bts360TotalFrames, targetIdx));
+                if (bts360Images[clamped - 1] && bts360Images[clamped - 1].complete && bts360Images[clamped - 1].naturalWidth > 0) {
+                    return bts360Images[clamped - 1];
+                }
+                for (let offset = 1; offset <= 30; offset++) {
+                    const up = ((clamped - 1 + offset) % bts360TotalFrames) + 1;
+                    if (bts360Images[up - 1] && bts360Images[up - 1].complete && bts360Images[up - 1].naturalWidth > 0) {
+                        return bts360Images[up - 1];
+                    }
+                    const down = ((clamped - 1 - offset + bts360TotalFrames) % bts360TotalFrames) + 1;
+                    if (bts360Images[down - 1] && bts360Images[down - 1].complete && bts360Images[down - 1].naturalWidth > 0) {
+                        return bts360Images[down - 1];
                     }
                 }
-            });
+                return null;
+            }
+
+            let baseRotation = 0;
+            let scrollSpinBoost = 0;
+            let currentRadiusExpansion = 0;
+            let bts360CurrentFrame = 1;
+            const bts360PlaybackSpeed = 0.55; // Fluid and comfortable frame advance
+            
+            // Real-time bidirectional scroll velocity listener with gentle speed cap
+            let lastScrollPos = window.scrollY || window.pageYOffset || 0;
+            window.addEventListener('scroll', () => {
+                const currentPos = window.scrollY || window.pageYOffset || 0;
+                const delta = currentPos - lastScrollPos;
+                lastScrollPos = currentPos;
+                
+                if (Math.abs(delta) > 0.5) {
+                    // delta > 0 (down) accelerates forward; delta < 0 (up) rotates backwards with strict speed cap
+                    scrollSpinBoost += delta * 0.016;
+                    scrollSpinBoost = Math.max(-1.8, Math.min(1.8, scrollSpinBoost));
+                }
+            }, { passive: true });
+
+            // Wheel / touchpad delta boost for comfortable, non-dizzy desktop response
+            window.addEventListener('wheel', (e) => {
+                if (isCarouselVisible && Math.abs(e.deltaY) > 2) {
+                    scrollSpinBoost += (e.deltaY > 0 ? 1 : -1) * Math.min(0.9, Math.abs(e.deltaY) * 0.008);
+                    scrollSpinBoost = Math.max(-1.8, Math.min(1.8, scrollSpinBoost));
+                }
+            }, { passive: true });
             
             let reqId = null;
             let isCarouselVisible = false;
-            let depthFrameCounter = 0;
 
             function renderCarousel() {
                 if (!isCarouselVisible) {
@@ -2972,38 +3022,59 @@ function startSimbionApp() {
                     return;
                 }
 
-                // Smooth idle auto-rotation
+                // Smooth idle auto-rotation (maintained at natural tempo)
                 baseRotation -= 0.12; 
                 
-                // Natural deceleration from scroll impulse
-                if (Math.abs(scrollSpinBoost) > 0.01) {
+                // Real-time responsive scroll deceleration with kinetic momentum
+                if (Math.abs(scrollSpinBoost) > 0.005) {
                     baseRotation -= scrollSpinBoost;
-                    scrollSpinBoost *= 0.94;
+                    scrollSpinBoost *= 0.88; // Natural organic friction, settles comfortably
                 }
                 
-                const currentTotalRot = baseRotation + scrollRotation;
+                // Smooth Centrifugal Breathing (radius & spacing expand when spinning fast, then contract back)
+                const targetExpansion = Math.min(25, Math.abs(scrollSpinBoost) * 12.0);
+                currentRadiusExpansion += (targetExpansion - currentRadiusExpansion) * 0.1;
+                const dynamicRadius = radius + currentRadiusExpansion;
                 
-                rows.forEach(row => {
-                    const totalRotation = currentTotalRot * row.dir;
-                    row.el.style.transform = `translateY(${row.y}px) rotateY(${totalRotation.toFixed(2)}deg)`;
+                const currentTotalRot = baseRotation;
+                
+                // Update 3D Orbital Billboarding coordinates for every photo
+                allItems.forEach(item => {
+                    const currentRingRot = currentTotalRot * item.dir;
+                    const globalAngle = (item.baseAngle + currentRingRot) % 360;
+                    const rad = (globalAngle * Math.PI) / 180;
+                    const x = Math.sin(rad) * dynamicRadius;
+                    const z = Math.cos(rad) * dynamicRadius;
+                    const dynamicRowY = item.rowY * (1 + (currentRadiusExpansion / radius) * 0.3);
+                    
+                    // 3D Smooth Cylindrical Tangent Curve:
+                    // Tilts cards along the circular arc without collapsing to 0px edge-on
+                    const tiltAngle = Math.sin(rad) * 48;
+                    
+                    item.el.style.transform = `translate3d(${x.toFixed(1)}px, ${dynamicRowY.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${tiltAngle.toFixed(1)}deg)`;
+                    item.el.style.zIndex = Math.round(z + dynamicRadius);
+                    
+                    // Front (z >= 0): 100% solid, NO opacity (targetOpacity = 1.0)
+                    // Back (z < 0): soft depth attenuation
+                    const targetOpacity = z >= 0 ? 1 : Math.max(0.4, 1 + (z / dynamicRadius) * 0.65);
+                    if (item.lastOpacity === undefined || Math.abs(targetOpacity - item.lastOpacity) >= 0.03) {
+                        item.lastOpacity = targetOpacity;
+                        item.card.style.opacity = targetOpacity.toFixed(2);
+                    }
                 });
                 
-                // AUTOMATIC PING-PONG 3D SEQUENCE LOOP with dynamic speed response
-                const speedFactor = 1 + Math.min(2.0, Math.abs(scrollSpinBoost) * 0.5);
-                autoPingPongFrame += autoSpeed * autoPingPongDirection * speedFactor;
-                if (autoPingPongFrame >= maxBtsFrame) {
-                    autoPingPongFrame = maxBtsFrame;
-                    autoPingPongDirection = -1;
-                } else if (autoPingPongFrame <= minBtsFrame) {
-                    autoPingPongFrame = minBtsFrame;
-                    autoPingPongDirection = 1;
+                // 3D sequence frame speed responds dynamically to scroll direction & velocity
+                const dynamicFrameDelta = bts360PlaybackSpeed + (scrollSpinBoost * 0.25);
+                bts360CurrentFrame += dynamicFrameDelta;
+                if (bts360CurrentFrame > bts360TotalFrames) {
+                    bts360CurrentFrame = ((bts360CurrentFrame - 1) % bts360TotalFrames) + 1;
+                } else if (bts360CurrentFrame < 1) {
+                    bts360CurrentFrame = bts360TotalFrames + ((bts360CurrentFrame - 1) % bts360TotalFrames);
                 }
-                const currentFrameIdx = Math.floor(autoPingPongFrame);
+                const currentFrameIdx = Math.floor(bts360CurrentFrame);
                 
-                // DRAW FRAME to center canvas using nearest-neighbor resolver
-                const frameImg = (typeof window.getNearestSequenceFrame === 'function')
-                    ? window.getNearestSequenceFrame(currentFrameIdx)
-                    : (window.sequenceImages ? window.sequenceImages[currentFrameIdx] : null);
+                // DRAW FRAME to center canvas using dedicated 360 3D sequence resolver
+                const frameImg = getNearestBts360Frame(currentFrameIdx);
 
                 if (frameImg && frameImg.complete && frameImg.naturalWidth > 0) {
                     ctxCenter.clearRect(0, 0, cSize, cSize);
@@ -3019,24 +3090,6 @@ function startSimbionApp() {
                     const dy = (cSize - drawH) / 2;
                     
                     ctxCenter.drawImage(frameImg, dx, dy, drawW, drawH);
-                }
-                
-                // Hardware-composited Depth with throttled opacity updates (60fps smooth)
-                depthFrameCounter = (depthFrameCounter + 1) % 3;
-                if (depthFrameCounter === 0) {
-                    allItems.forEach(item => {
-                        const currentRingRot = currentTotalRot * item.dir;
-                        const globalAngle = (item.angle + currentRingRot) % 360;
-                        const rad = globalAngle * Math.PI / 180;
-                        const z = Math.cos(rad); 
-                        
-                        const targetOpacity = z < -0.1 ? Math.max(0.25, 1 - Math.abs(z + 0.1) * 0.75) : 1;
-
-                        if (item.lastOpacity === undefined || Math.abs(targetOpacity - item.lastOpacity) >= 0.06) {
-                            item.lastOpacity = targetOpacity;
-                            item.img.style.opacity = targetOpacity.toFixed(2);
-                        }
-                    });
                 }
 
                 reqId = requestAnimationFrame(renderCarousel);

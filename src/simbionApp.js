@@ -49,15 +49,22 @@ try {
 window.globalHighScores = [];
 window.isFirebaseReady = false;
 
-// Structured error handler according to Firebase guidelines
+// Structured error handler according to Firebase guidelines with circular-safe protection
 function handleFirestoreError(error, operationType, path) {
-    const errInfo = {
-        error: error instanceof Error ? error.message : String(error),
-        operationType: operationType,
-        path: path,
-        timestamp: new Date().toISOString()
-    };
-    console.warn("Firestore Notification:", JSON.stringify(errInfo));
+    try {
+        const errorMsg = error && typeof error === 'object'
+            ? (error.message ? String(error.message) : (error.code ? String(error.code) : 'Unknown Firestore Error'))
+            : String(error || 'Unknown Error');
+        const errInfo = {
+            error: errorMsg,
+            operationType: String(operationType || ''),
+            path: String(path || ''),
+            timestamp: new Date().toISOString()
+        };
+        console.warn("Firestore Notification:", JSON.stringify(errInfo));
+    } catch {
+        console.warn("Firestore Notification:", String(error));
+    }
 }
 
 if (db) {
@@ -832,13 +839,13 @@ function startSimbionApp() {
             processQueue();
         }
 
-        // Tier 1: Immediate Keyframes (every 8th frame for instant coarse scrub response)
+        // Tier 1: Immediate Keyframes (every 4th frame for instant smooth coarse scrub response)
         const tier1Keyframes = [1];
-        for (let i = 8; i <= totalFrames; i += 8) tier1Keyframes.push(i);
+        for (let i = 4; i <= totalFrames; i += 4) tier1Keyframes.push(i);
         enqueueIdleFrames(tier1Keyframes);
 
-        // Preload the initial 15 frames immediately for instant zero-lag intro on page load
-        preloadUpcomingFrames(1, 1, 15);
+        // Preload the initial 25 frames immediately for instant zero-lag intro on touch/mobile
+        preloadUpcomingFrames(1, 1, 25);
 
         // Tier 2: Secondary Keyframes (every 4th frame)
         setTimeout(() => {
@@ -978,10 +985,6 @@ function startSimbionApp() {
             const renderH = nativeH * fitFactor;
 
             ctxAbout.save();
-            ctxAbout.imageSmoothingEnabled = true;
-            if ('imageSmoothingQuality' in ctxAbout) {
-                ctxAbout.imageSmoothingQuality = "high";
-            }
             ctxAbout.translate(currentX, currentY);
             ctxAbout.rotate(rotationRad);
             ctxAbout.drawImage(img, -renderW / 2, -renderH / 2, renderW, renderH);
@@ -994,7 +997,7 @@ function startSimbionApp() {
             trigger: "#about",
             start: "top bottom",
             end: "bottom top",
-            scrub: isTouchDevice ? 0.18 : 0.6,
+            scrub: isTouchDevice ? true : 0.6,
             onUpdate: (self) => {
                 isAboutVisible = true;
                 aboutFrameIdx = (window.sequenceTotalFrames - 1) * self.progress;
@@ -1467,22 +1470,36 @@ function startSimbionApp() {
         if (!track) return;
         let html = '';
         
-        const row1 = cmsData.works.filter(w => w.row === 1).sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
-        const row2 = cmsData.works.filter(w => w.row === 2).sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
-        const row3 = cmsData.works.filter(w => w.row === 3).sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
-
         const isMobile = window.innerWidth < 768;
-        const itemSpacing = isMobile ? 74 : 18;
-        const startLeft = isMobile ? 100 : 110;
+        
+        let row1 = [], row2 = [], row3 = [], row4 = [];
+        if (isMobile) {
+            // Distribute works into 4 clean rows for mobile so it's spacious and elegant
+            const sorted = [...cmsData.works].sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
+            sorted.forEach((w, idx) => {
+                const rem = idx % 4;
+                if (rem === 0) row1.push(w);
+                else if (rem === 1) row2.push(w);
+                else if (rem === 2) row3.push(w);
+                else row4.push(w);
+            });
+        } else {
+            row1 = cmsData.works.filter(w => w.row === 1).sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
+            row2 = cmsData.works.filter(w => w.row === 2).sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
+            row3 = cmsData.works.filter(w => w.row === 3).sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
+        }
+
+        const itemSpacing = isMobile ? 58 : 18;
+        const startLeft = isMobile ? 95 : 110;
 
         function renderRows(items, topPercent, rowNum) {
             let subHtml = '';
-            const baseDepth = rowNum === 1 ? 0.72 : (rowNum === 2 ? 1.0 : 1.38);
+            const baseDepth = rowNum === 1 ? 0.72 : (rowNum === 2 ? 0.95 : (rowNum === 3 ? 1.18 : 1.38));
             items.forEach((item, idx) => {
                 const leftPos = startLeft + (idx * itemSpacing);
-                const baseRotation = (Math.random() - 0.5) * 6; 
-                const depthFactor = (baseDepth + (idx % 2 === 0 ? 0.06 : -0.06)).toFixed(2);
-                const depthFactorY = ((idx % 3 === 0 ? 1.0 : -0.8) * (rowNum === 2 ? 0.6 : 1.0)).toFixed(2);
+                const baseRotation = (Math.random() - 0.5) * 5; 
+                const depthFactor = (baseDepth + (idx % 2 === 0 ? 0.05 : -0.05)).toFixed(2);
+                const depthFactorY = ((idx % 3 === 0 ? 0.8 : -0.6) * (rowNum === 2 ? 0.5 : 0.8)).toFixed(2);
 
                 subHtml += `
                     <div class="gallery-item cms-gallery-item" style="left: ${leftPos}vw; top: ${topPercent}%;">
@@ -1508,16 +1525,19 @@ function startSimbionApp() {
             return subHtml;
         }
 
-        const r1Top = isMobile ? 15 : 14;
-        const r2Top = isMobile ? 44 : 41;
-        const r3Top = isMobile ? 73 : 68;
+        if (isMobile) {
+            html += renderRows(row1, 9, 1);
+            html += renderRows(row2, 31, 2);
+            html += renderRows(row3, 53, 3);
+            html += renderRows(row4, 75, 4);
+        } else {
+            html += renderRows(row1, 14, 1);
+            html += renderRows(row2, 41, 2);
+            html += renderRows(row3, 68, 3);
+        }
 
-        html += renderRows(row1, r1Top, 1);
-        html += renderRows(row2, r2Top, 2);
-        html += renderRows(row3, r3Top, 3);
-
-        const maxItems = Math.max(row1.length, row2.length, row3.length);
-        const dynamicWidth = startLeft + ((maxItems - 1) * itemSpacing) + (isMobile ? 70 : 60) + 90; 
+        const maxItems = Math.max(row1.length, row2.length, row3.length, (row4 ? row4.length : 0));
+        const dynamicWidth = startLeft + ((maxItems - 1) * itemSpacing) + (isMobile ? 65 : 60) + 90; 
         track.style.width = `${dynamicWidth}vw`;
         track.innerHTML = html;
         
@@ -1656,6 +1676,7 @@ function startSimbionApp() {
     function updateChatBalloonState() {
         const cb = document.getElementById('chat-balloon');
         const cm = document.getElementById('chat-modal');
+        const tail = document.getElementById('chat-balloon-tail');
         if (!cb) return;
         
         if (cm && !cm.classList.contains('opacity-0') && !cm.classList.contains('pointer-events-none')) {
@@ -1670,13 +1691,44 @@ function startSimbionApp() {
             if (isContactVisibleForBalloon) {
                 cb.classList.remove('opacity-0', 'pointer-events-none', 'scale-90', 'translate-y-4');
                 cb.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'translate-y-0');
+                
+                // Centered right below "Guess we'll see you at the first PPM" on mobile only
+                cb.style.position = 'fixed';
+                cb.style.left = '50%';
+                cb.style.right = 'auto';
+                cb.style.bottom = '26%';
+                cb.style.transform = 'translate(-50%, 0)';
+                if (tail) {
+                    tail.style.left = '50%';
+                    tail.style.right = 'auto';
+                    tail.style.transform = 'translateX(-50%) rotate(45deg)';
+                }
             } else {
                 cb.classList.add('opacity-0', 'pointer-events-none', 'scale-90', 'translate-y-4');
                 cb.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100', 'translate-y-0');
+                cb.style.left = '';
+                cb.style.right = '';
+                cb.style.bottom = '';
+                cb.style.transform = '';
+                if (tail) {
+                    tail.style.left = '';
+                    tail.style.right = '';
+                    tail.style.transform = '';
+                }
             }
         } else {
+            // PC / Desktop & Tablet: Exactly restored from V2
             cb.classList.remove('opacity-0', 'pointer-events-none', 'scale-90', 'translate-y-4');
             cb.classList.add('opacity-100', 'pointer-events-auto', 'scale-100', 'translate-y-0');
+            cb.style.position = '';
+            cb.style.left = '';
+            cb.style.right = '';
+            cb.style.transform = '';
+            if (tail) {
+                tail.style.left = '';
+                tail.style.right = '';
+                tail.style.transform = '';
+            }
 
             if (isContactVisibleForBalloon) {
                 cb.style.bottom = '50%';
@@ -1751,7 +1803,31 @@ function startSimbionApp() {
 
     function initVideoTriggers() {
         document.querySelectorAll('.video-trigger').forEach(trigger => {
+            let touchStartX = 0, touchStartY = 0, isTouchDrag = false;
+
+            trigger.addEventListener('touchstart', (e) => {
+                if (e.touches && e.touches.length > 0) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    isTouchDrag = false;
+                }
+            }, { passive: true });
+
+            trigger.addEventListener('touchmove', (e) => {
+                if (e.touches && e.touches.length > 0) {
+                    const dx = Math.abs(e.touches[0].clientX - touchStartX);
+                    const dy = Math.abs(e.touches[0].clientY - touchStartY);
+                    if (dx > 8 || dy > 8) {
+                        isTouchDrag = true;
+                    }
+                }
+            }, { passive: true });
+
             trigger.addEventListener('click', (e) => {
+                if (isTouchDrag) {
+                    isTouchDrag = false;
+                    return;
+                }
                 e.preventDefault();
                 const videoId = trigger.getAttribute('data-video-id');
                 if (modalIframe) modalIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
@@ -2801,6 +2877,16 @@ function startSimbionApp() {
         measureScrollTrack();
         updateScrollIndicator(getPageScrollProgress());
         updateHeaderSceneState(window.pageYOffset);
+        updateChatBalloonState();
+    }, { passive: true });
+
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            measureScrollTrack();
+            updateScrollIndicator(getPageScrollProgress());
+            updateHeaderSceneState(window.pageYOffset);
+            updateChatBalloonState();
+        }, 150);
     }, { passive: true });
 
     if (window.gsap) {
@@ -2843,7 +2929,7 @@ function startSimbionApp() {
             
             const radius = isMobile ? 280 : 600;
             const imgWidth = isMobile ? 70 : 130;
-            const rowHeight = isMobile ? 120 : 185;
+            const rowHeight = isMobile ? 85 : 185;
             
             btsRing.style.width = imgWidth + 'px';
             btsRing.style.height = (imgWidth * 0.6) + 'px';
@@ -2991,6 +3077,48 @@ function startSimbionApp() {
             let bts360CurrentFrame = 1;
             const bts360PlaybackSpeed = 0.55; // Fluid and comfortable frame advance
             
+            // Direct Touch Swipe & Drag Gestures for Mobile & Tablet (Zero interference with Desktop)
+            let touchStartX = 0;
+            let lastTouchX = 0;
+            let lastTouchTime = 0;
+            let touchVelocity = 0;
+            let isTouchingRing = false;
+
+            const soulTouchTarget = document.getElementById('the-soul');
+            if (soulTouchTarget) {
+                soulTouchTarget.addEventListener('touchstart', (e) => {
+                    if (e.touches && e.touches.length > 0) {
+                        isTouchingRing = true;
+                        touchStartX = e.touches[0].clientX;
+                        lastTouchX = touchStartX;
+                        lastTouchTime = performance.now();
+                        touchVelocity = 0;
+                    }
+                }, { passive: true });
+
+                soulTouchTarget.addEventListener('touchmove', (e) => {
+                    if (!isTouchingRing || !e.touches || e.touches.length === 0) return;
+                    const currentX = e.touches[0].clientX;
+                    const deltaX = currentX - lastTouchX;
+                    const now = performance.now();
+                    const dt = Math.max(1, now - lastTouchTime);
+
+                    touchVelocity = (deltaX / dt) * 14;
+                    baseRotation += deltaX * (isMobile ? 0.42 : 0.32);
+
+                    lastTouchX = currentX;
+                    lastTouchTime = now;
+                }, { passive: true });
+
+                soulTouchTarget.addEventListener('touchend', () => {
+                    if (!isTouchingRing) return;
+                    isTouchingRing = false;
+                    if (Math.abs(touchVelocity) > 0.2) {
+                        scrollSpinBoost = Math.max(-2.2, Math.min(2.2, -touchVelocity * 0.2));
+                    }
+                }, { passive: true });
+            }
+
             // Real-time bidirectional scroll velocity listener with gentle speed cap
             let lastScrollPos = window.scrollY || window.pageYOffset || 0;
             window.addEventListener('scroll', () => {
@@ -3117,17 +3245,23 @@ function startSimbionApp() {
             });
         }
 
+        const isMobileScreen = window.innerWidth < 768;
+
         gsap.to('.parallax-hero', {
-            yPercent: 35, rotation: 3, ease: "none",
-            scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: isTouchDevice ? 0.3 : 1.2 }
+            yPercent: isMobileScreen ? 15 : 35,
+            rotation: isMobileScreen ? 1 : 3,
+            ease: "none",
+            scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: isTouchDevice ? true : 1.2 }
         });
 
-        gsap.to('#hero', {
-            yPercent: 100,
-            opacity: 0,
-            ease: "none",
-            scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true }
-        });
+        if (!isMobileScreen) {
+            gsap.to('#hero', {
+                yPercent: 100,
+                opacity: 0,
+                ease: "none",
+                scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true }
+            });
+        }
 
         gsap.to('#about', {
             yPercent: 30,
@@ -3284,7 +3418,7 @@ function startSimbionApp() {
                     duration: 0.35, 
                     ease: "power2.out", 
                     overwrite: "auto",
-                    onComplete: () => gsap.set(item, { zIndex: 10 }) 
+                    onComplete: () => gsap.set(item, { zIndex: 30 }) 
                 });
             });
 
@@ -3294,7 +3428,7 @@ function startSimbionApp() {
             }, { passive: true });
 
             inner.addEventListener('touchend', () => {
-                gsap.to(inner, { scale: 1, duration: 0.3, ease: "power2.out", onComplete: () => gsap.set(item, { zIndex: 10 }) });
+                gsap.to(inner, { scale: 1, duration: 0.3, ease: "power2.out", onComplete: () => gsap.set(item, { zIndex: 30 }) });
             }, { passive: true });
         });
     }

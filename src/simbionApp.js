@@ -314,26 +314,29 @@ function startSimbionApp() {
 
     // Animate About Us paragraph line by line
     function animateAboutText() {
-        const para = document.getElementById('about-desc-text');
-        if (!para || !window.gsap) return;
+        const container = document.getElementById('about-desc-text');
+        if (!container || !window.gsap) return;
 
-        if (!para.dataset.originalText) {
-            para.dataset.originalText = para.textContent.trim().replace(/\s+/g, ' ');
-        }
-        const rawText = para.dataset.originalText;
-        const words = rawText.split(' ');
+        const pElements = Array.from(container.querySelectorAll('.about-p'));
+        if (pElements.length === 0) return;
 
-        if (para._textTl) {
-            if (para._textTl.scrollTrigger) para._textTl.scrollTrigger.kill();
-            para._textTl.kill();
-            para._textTl = null;
+        if (container._textTl) {
+            if (container._textTl.scrollTrigger) container._textTl.scrollTrigger.kill();
+            container._textTl.kill();
+            container._textTl = null;
         }
 
-        para.innerHTML = words.map(word => 
-            `<span class="about-mask"><span class="about-slide"><span class="about-word">${word}</span></span></span> `
-        ).join('');
+        pElements.forEach(p => {
+            if (!p.dataset.originalText) {
+                p.dataset.originalText = p.textContent.trim().replace(/\s+/g, ' ');
+            }
+            const words = p.dataset.originalText.split(' ');
+            p.innerHTML = words.map(word => 
+                `<span class="about-mask"><span class="about-slide"><span class="about-word">${word}</span></span></span> `
+            ).join('');
+        });
 
-        const slideElements = Array.from(para.querySelectorAll('.about-slide'));
+        const slideElements = Array.from(container.querySelectorAll('.about-slide'));
         if (slideElements.length === 0) return;
 
         let lines = [];
@@ -375,14 +378,14 @@ function startSimbionApp() {
                 stagger: 0.02,
                 duration: 1,
                 ease: "power3.out"
-            }, lineIndex * 0.3);
+            }, lineIndex * 0.25);
         });
 
-        para._textTl = tl;
+        container._textTl = tl;
         setupInteractiveParagraph('about-desc-text', '.about-word');
     }
 
-    // Animate Statement text on scroll
+    // Animate Statement text on scroll with Kinetic Word Drift Effect (ala theartofcinema.xyz)
     function animateStatementScroll() {
         const para = document.getElementById('statement-desc-text') || document.getElementById('fit-desc-text');
         if (!para || !window.gsap) return;
@@ -399,9 +402,73 @@ function startSimbionApp() {
             para._textTl = null;
         }
 
-        para.innerHTML = words.map(word => 
-            `<span class="statement-mask"><span class="statement-slide"><span class="statement-word">${word}</span></span></span> `
-        ).join('');
+        if (para._driftTweens) {
+            para._driftTweens.forEach(t => {
+                if (t.scrollTrigger) t.scrollTrigger.kill();
+                t.kill();
+            });
+            para._driftTweens = [];
+        }
+
+        // Curated rows with smart word-length grouping (short words get 4 words, long words get 3, 2, or 1 word)
+        // AND each row is guaranteed to have at least one ANCHOR word (word0) that stays still as a layout reference!
+        const curatedLines = [
+            // Row 1: 3 words
+            [ { text: "EVERY", drift: 0 }, { text: "PROJECT", drift: 1 }, { text: "DESERVES", drift: 2 } ],
+            // Row 2: 4 words (short words)
+            [ { text: "ITS", drift: 1 }, { text: "OWN", drift: 0 }, { text: "FIT.", drift: 2 }, { text: "WE", drift: 3 } ],
+            // Row 3: 3 words (medium words)
+            [ { text: "TAILOR", drift: 2 }, { text: "EACH", drift: 0 }, { text: "ONE", drift: 1 } ],
+            // Row 4: 2 words (long word scratch)
+            [ { text: "FROM", drift: 0 }, { text: "SCRATCH,", drift: 3 } ],
+            // Row 5: 2 words (long complex words)
+            [ { text: "CAREFULLY", drift: 0 }, { text: "STITCHING", drift: 2 } ],
+            // Row 6: 3 words
+            [ { text: "EVERY", drift: 1 }, { text: "FRAME", drift: 0 }, { text: "TOGETHER", drift: 2 } ],
+            // Row 7: 2 words
+            [ { text: "WITH", drift: 0 }, { text: "PASSION,", drift: 1 } ],
+            // Row 8: 3 words (long words)
+            [ { text: "PURPOSE,", drift: 3 }, { text: "AND", drift: 0 }, { text: "DEDICATION.", drift: 2 } ],
+            // Row 9: 4 words (punchy short words)
+            [ { text: "WE", drift: 1 }, { text: "BELIEVE", drift: 0 }, { text: "GREAT", drift: 2 }, { text: "WORK", drift: 3 } ],
+            // Row 10: 3 words
+            [ { text: "COMES", drift: 0 }, { text: "FROM", drift: 1 }, { text: "BRINGING", drift: 2 } ],
+            // Row 11: 1 word (impact anchor)
+            [ { text: "TOGETHER", drift: 0 } ],
+            // Row 12: 4 words (short words)
+            [ { text: "THE", drift: 0 }, { text: "RIGHT", drift: 1 }, { text: "PEOPLE,", drift: 2 }, { text: "IDEAS,", drift: 3 } ],
+            // Row 13: 2 words (long word perspectives)
+            [ { text: "AND", drift: 0 }, { text: "PERSPECTIVES", drift: 2 } ],
+            // Row 14: 4 words (short connective words)
+            [ { text: "THAT", drift: 3 }, { text: "ALIGN", drift: 0 }, { text: "WITH", drift: 1 }, { text: "THE", drift: 2 } ],
+            // Row 15: 1 word (anchor word)
+            [ { text: "VISION.", drift: 0 } ],
+            // Row 16: 3 words
+            [ { text: "EVERY", drift: 0 }, { text: "DETAIL", drift: 1 }, { text: "MATTERS,", drift: 2 } ],
+            // Row 17: 4 words (short snappy words)
+            [ { text: "EVERY", drift: 1 }, { text: "FRAME", drift: 0 }, { text: "HAS", drift: 2 }, { text: "A", drift: 3 } ],
+            // Row 18: 1 word (anchor word)
+            [ { text: "PURPOSE,", drift: 0 } ],
+            // Row 19: 3 words
+            [ { text: "AND", drift: 0 }, { text: "EVERY", drift: 1 }, { text: "PROJECT", drift: 2 } ],
+            // Row 20: 3 words
+            [ { text: "DESERVES", drift: 3 }, { text: "THE", drift: 0 }, { text: "CARE", drift: 1 } ],
+            // Row 21: 4 words (short words)
+            [ { text: "TO", drift: 0 }, { text: "MAKE", drift: 1 }, { text: "IT", drift: 2 }, { text: "FEEL", drift: 3 } ],
+            // Row 22: 3 words
+            [ { text: "TRULY", drift: 2 }, { text: "ITS", drift: 0 }, { text: "OWN.", drift: 1 } ]
+        ];
+
+        let rowsHtml = curatedLines.map(row => {
+            const chunkHtml = row.map(item => {
+                const r = item.drift; // 0 is STAY/ANCHOR, 1 is left, 2 is right, 3 is far-left
+                const driftClass = r > 0 ? `statement-drift-${r}` : 'statement-anchor';
+                return `<span class="statement-drift-word ${driftClass} word${r}"><span class="statement-slide"><span class="statement-word">${item.text}</span></span></span>`;
+            }).join(' ');
+            return `<span class="statement-row">${chunkHtml}</span>`;
+        });
+
+        para.innerHTML = rowsHtml.join('');
 
         const slideElements = Array.from(para.querySelectorAll('.statement-slide'));
         if (slideElements.length === 0) return;
@@ -415,7 +482,7 @@ function startSimbionApp() {
             if (prevTop === null) {
                 prevTop = top;
                 currentLine.push(el);
-            } else if (Math.abs(top - prevTop) > 6) {
+            } else if (Math.abs(top - prevTop) > 8) {
                 lines.push(currentLine);
                 currentLine = [el];
                 prevTop = top;
@@ -425,14 +492,15 @@ function startSimbionApp() {
         });
         if (currentLine.length > 0) lines.push(currentLine);
 
-        gsap.set(slideElements, { yPercent: 110, opacity: 0.15, rotateX: -15 });
+        gsap.set(slideElements, { yPercent: 110, opacity: 0, rotateX: -10 });
 
+        // Timeline for line-by-line reveal
         const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: "#statement",
-                start: "top 75%",
-                end: "top 18%",
-                scrub: isTouchDevice ? 0.3 : 1.0,
+                start: "top 80%",
+                end: "top 30%",
+                scrub: isTouchDevice ? 0.3 : 0.8,
                 invalidateOnRefresh: true
             }
         });
@@ -445,11 +513,63 @@ function startSimbionApp() {
                 stagger: 0.02,
                 duration: 1,
                 ease: "power3.out"
-            }, lineIndex * 0.3);
+            }, lineIndex * 0.25);
         });
 
         para._textTl = tl;
-        setupInteractiveParagraph('statement-desc-text', '.statement-word');
+
+        // Kinetic Word Drift Scrub (Faster slide with tight scroll range & instant scrub)
+        const driftTweens = [];
+        const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+        const driftMult = isCoarse ? 0.80 : 1.25;
+
+        // Individual word trigger mapping with shorter scroll range for brisk and rapid drift
+        para.querySelectorAll('.word1').forEach(el => {
+            const tw = gsap.to(el, {
+                x: `${-0.50 * driftMult}em`,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 78%",
+                    end: "top 22%",
+                    scrub: 0.03,
+                    invalidateOnRefresh: true
+                }
+            });
+            driftTweens.push(tw);
+        });
+
+        para.querySelectorAll('.word2').forEach(el => {
+            const tw = gsap.to(el, {
+                x: `${0.60 * driftMult}em`,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 78%",
+                    end: "top 22%",
+                    scrub: 0.03,
+                    invalidateOnRefresh: true
+                }
+            });
+            driftTweens.push(tw);
+        });
+
+        para.querySelectorAll('.word3').forEach(el => {
+            const tw = gsap.to(el, {
+                x: `${-0.70 * driftMult}em`,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 78%",
+                    end: "top 22%",
+                    scrub: 0.03,
+                    invalidateOnRefresh: true
+                }
+            });
+            driftTweens.push(tw);
+        });
+
+        para._driftTweens = driftTweens;
     }
 
     // Crazy 3D Character Physics for "WE ARE WHAT WE'VE MADE"
@@ -1135,14 +1255,27 @@ function startSimbionApp() {
             const isMobile = window.innerWidth < 768;
             ctxStatement.clearRect(0, 0, statementWidth, statementHeight);
 
-            const baseScale = isMobile ? 0.35 : 0.40;
+            // Fade-in opacity when entering (smooth fade from 0 to 1 during early scroll)
+            const fadeInAlpha = Math.max(0, Math.min(1, p / 0.16));
+            // Fade-out when leaving near bottom
+            const fadeOutAlpha = p > 0.88 ? Math.max(0, (1 - p) / 0.12) : 1;
+            const finalAlpha = fadeInAlpha * fadeOutAlpha;
+            if (finalAlpha <= 0.001) return;
+
+            const baseScale = isMobile ? 0.22 : 0.28;
             const scaleFactor = Math.min(1, p * 2.0);
-            const scaleMultiplier = 1.40 - (0.40 * scaleFactor);
+            const scaleMultiplier = 1.08 - (0.08 * scaleFactor);
             const currentScale = baseScale * scaleMultiplier;
 
             const baseOffsetX = isMobile ? 0.95 : 0.88;
             const currentX = statementWidth * (baseOffsetX - 0.08 * scaleFactor);
-            const currentY = statementHeight * (p <= 0.5 ? (-0.05 + 0.55 * (p / 0.5)) : 0.50) + (isMobile ? 20 : 10);
+
+            // Position shifted downwards so the top never gets clipped when entering
+            const startSafeY = statementHeight * (isMobile ? 0.26 : 0.20);
+            const midSafeY = statementHeight * 0.50;
+            const currentY = (p <= 0.5) 
+                ? (startSafeY + (midSafeY - startSafeY) * (p / 0.5))
+                : midSafeY + (isMobile ? 20 : 10);
             const rotationRad = (6 * (1 - scaleFactor) * Math.PI) / 180;
 
             const aspect = (img.naturalWidth || 512) / (img.naturalHeight || 600);
@@ -1150,6 +1283,7 @@ function startSimbionApp() {
             let renderW = renderH * aspect;
 
             ctxStatement.save();
+            ctxStatement.globalAlpha = finalAlpha;
             ctxStatement.imageSmoothingEnabled = true;
             if ('imageSmoothingQuality' in ctxStatement) {
                 ctxStatement.imageSmoothingQuality = "high";
@@ -1446,10 +1580,10 @@ function startSimbionApp() {
 
         const floatElements = gsap.utils.toArray('.idle-float');
         floatElements.forEach((el, i) => {
-            const yDist = (i % 2 === 0 ? 14 : -14) + gsap.utils.random(-6, 6);
-            const xDist = (i % 3 === 0 ? 10 : -10) + gsap.utils.random(-5, 5);
-            const rotDist = (i % 2 === 0 ? 2.5 : -2.5) + gsap.utils.random(-1, 1);
-            const dur = gsap.utils.random(8.0, 14.0);
+            const yDist = (i % 2 === 0 ? 22 : -22) + gsap.utils.random(-6, 6);
+            const xDist = (i % 3 === 0 ? 12 : -12) + gsap.utils.random(-4, 4);
+            const rotDist = (i % 2 === 0 ? 3.0 : -3.0) + gsap.utils.random(-1, 1);
+            const dur = gsap.utils.random(3.2, 4.8);
 
             const tw = gsap.to(el, {
                 y: yDist,
@@ -1459,8 +1593,9 @@ function startSimbionApp() {
                 ease: "sine.inOut",
                 repeat: -1,
                 yoyo: true,
-                delay: (i * 0.3) % 2.5
+                delay: (i * 0.25) % 2.0
             });
+            el._idleTween = tw;
             idleFloatTweens.push(tw);
         });
     }
@@ -1489,7 +1624,7 @@ function startSimbionApp() {
             row3 = cmsData.works.filter(w => w.row === 3).sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
         }
 
-        const itemSpacing = isMobile ? 58 : 18;
+        const itemSpacing = isMobile ? 68 : 22.5;
         const startLeft = isMobile ? 95 : 110;
 
         function renderRows(items, topPercent, rowNum) {
@@ -1507,9 +1642,9 @@ function startSimbionApp() {
                             <div class="parallax-wrap w-full h-full" data-mx="${(idx % 2 === 0 ? -4 : 5)}" data-my="${(idx % 3 === 0 ? 6 : -5)}">
                                 <div class="velocity-parallax w-full h-full" data-depth="${depthFactor}" data-depth-y="${depthFactorY}">
                                     <div class="idle-float w-full h-full">
-                                        <div class="gallery-item-inner block relative w-full h-full overflow-hidden rounded-sm group cursor-pointer bg-darkBg video-trigger border border-white/10 hover:border-simbionBlue/60 active:scale-95 transition-all duration-500" data-video-id="${item.videoId}">
-                                            <img src="https://img.youtube.com/vi/${item.videoId}/maxresdefault.jpg" alt="${item.title}" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-all duration-700 ease-out">
-                                            <div class="absolute inset-x-0 bottom-0 p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0 text-left pointer-events-none z-20">
+                                        <div class="gallery-item-inner block relative w-full h-full overflow-hidden rounded-sm group cursor-pointer bg-darkBg video-trigger border border-white/10 hover:border-simbionBlue/60 active:scale-95 transition-colors duration-150" data-video-id="${item.videoId}">
+                                            <img src="https://img.youtube.com/vi/${item.videoId}/maxresdefault.jpg" alt="${item.title}" class="w-full h-full object-cover opacity-80 group-hover:opacity-95 transition-opacity duration-200 ease-out">
+                                            <div class="absolute inset-x-0 bottom-0 p-3 md:p-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 text-left pointer-events-none z-20">
                                                 <div class="absolute inset-0 -z-10 bg-gradient-to-t from-darkBg/95 via-darkBg/60 to-transparent"></div>
                                                 <span class="text-[7px] md:text-[9px] text-simbionBlue tracking-[0.2em] font-bold font-mono block uppercase">${item.year} — ${item.artist}</span>
                                                 <h3 class="text-[10px] md:text-sm font-bold tracking-tight text-lightText mt-0.5 md:mt-1 uppercase">${item.title}</h3>
@@ -1537,7 +1672,7 @@ function startSimbionApp() {
         }
 
         const maxItems = Math.max(row1.length, row2.length, row3.length, (row4 ? row4.length : 0));
-        const dynamicWidth = startLeft + ((maxItems - 1) * itemSpacing) + (isMobile ? 65 : 60) + 90; 
+        const dynamicWidth = startLeft + ((maxItems - 1) * itemSpacing) + (isMobile ? 80 : 75) + 100; 
         track.style.width = `${dynamicWidth}vw`;
         track.innerHTML = html;
         
@@ -3400,7 +3535,7 @@ function startSimbionApp() {
             });
         }
 
-        gsap.to("#selected-title", {
+        gsap.to(["#selected-title", "#selected-desc", "#selected-right-note"], {
             opacity: 0,
             y: -30,
             ease: "power2.out",
@@ -3408,7 +3543,13 @@ function startSimbionApp() {
                 trigger: "#selected-work",
                 start: "top top",
                 end: "top+=150",
-                scrub: true
+                scrub: true,
+                onUpdate: (self) => {
+                    const titleWrap = document.querySelector("#selected-work .absolute.top-20");
+                    if (titleWrap) {
+                        titleWrap.style.pointerEvents = self.progress > 0.05 ? "none" : "auto";
+                    }
+                }
             }
         });
 
@@ -3432,31 +3573,73 @@ function startSimbionApp() {
         const galleryItems = document.querySelectorAll('.gallery-item');
         galleryItems.forEach((item) => {
             const inner = item.querySelector('.gallery-item-inner');
+            const idleFloatEl = item.querySelector('.idle-float');
             if (!inner || !window.gsap) return;
             
             inner.addEventListener('mouseenter', () => {
                 gsap.set(item, { zIndex: 100 });
-                gsap.to(inner, { scale: 1.12, duration: 0.35, ease: "power2.out", overwrite: "auto" });
+                gsap.to(inner, { scale: 1.15, duration: 0.18, ease: "power2.out", overwrite: "auto" });
+                if (idleFloatEl && idleFloatEl._idleTween) {
+                    idleFloatEl._idleTween.pause();
+                }
             });
             inner.addEventListener('mouseleave', () => {
                 gsap.to(inner, { 
                     scale: 1, 
-                    duration: 0.35, 
+                    duration: 0.22, 
                     ease: "power2.out", 
                     overwrite: "auto",
-                    onComplete: () => gsap.set(item, { zIndex: 30 }) 
+                    onComplete: () => {
+                        gsap.set(item, { zIndex: 50 });
+                        if (idleFloatEl && idleFloatEl._idleTween) {
+                            idleFloatEl._idleTween.resume();
+                        }
+                    }
                 });
             });
 
             inner.addEventListener('touchstart', () => {
                 gsap.set(item, { zIndex: 100 });
-                gsap.to(inner, { scale: 1.08, duration: 0.2, ease: "power2.out" });
+                gsap.to(inner, { scale: 1.1, duration: 0.15, ease: "power2.out", overwrite: "auto" });
             }, { passive: true });
 
             inner.addEventListener('touchend', () => {
-                gsap.to(inner, { scale: 1, duration: 0.3, ease: "power2.out", onComplete: () => gsap.set(item, { zIndex: 30 }) });
+                gsap.to(inner, { scale: 1, duration: 0.2, ease: "power2.out", overwrite: "auto", onComplete: () => gsap.set(item, { zIndex: 50 }) });
             }, { passive: true });
         });
+
+        // Mouse Parallax Floating on Selected Works
+        const selectedWorkSection = document.getElementById('selected-work');
+        if (selectedWorkSection && !window.matchMedia('(pointer: coarse)').matches) {
+            let pRaf = null;
+            let targetNormX = 0;
+            let targetNormY = 0;
+
+            const onMouseMove = (e) => {
+                targetNormX = (e.clientX / window.innerWidth) - 0.5;
+                targetNormY = (e.clientY / window.innerHeight) - 0.5;
+
+                if (!pRaf) {
+                    pRaf = requestAnimationFrame(() => {
+                        const wraps = selectedWorkSection.querySelectorAll('.parallax-wrap');
+                        wraps.forEach((wrap) => {
+                            const mx = parseFloat(wrap.dataset.mx) || 5;
+                            const my = parseFloat(wrap.dataset.my) || 5;
+                            gsap.to(wrap, {
+                                x: targetNormX * mx * 7,
+                                y: targetNormY * my * 7,
+                                duration: 0.8,
+                                ease: "power2.out",
+                                overwrite: "auto"
+                            });
+                        });
+                        pRaf = null;
+                    });
+                }
+            };
+
+            selectedWorkSection.addEventListener('mousemove', onMouseMove, { passive: true });
+        }
     }
     
     initGalleryInteractions();

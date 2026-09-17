@@ -107,6 +107,7 @@ window.submitScoreToFirebase = async function(name, time) {
 };
 
 function startSimbionApp() {
+
     if (window.__simbionInitialized) return;
     window.__simbionInitialized = true;
 
@@ -121,7 +122,10 @@ function startSimbionApp() {
         });
     }
 
-    const isTouchDevice = window.matchMedia("(pointer: coarse), (hover: none), (max-width: 1024px)").matches;
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+
+    
+
 
     // Shooting Preloader Logic
     const loader = document.getElementById('fake-loader');
@@ -1316,13 +1320,13 @@ function startSimbionApp() {
     // CMS Data and Secrets
     const SECRET_KEYWORD = "fundamental"; 
     const ADMIN_PASSWORD = "simbiosismutualisme"; 
-    const CMS_DATA_VERSION = "2026_difki_belum_selesai_selalu_between_mak_youremine";
+    const CMS_DATA_VERSION = "2026_hanin_cinta_ini_membunuhku_v2_fixed";
 
     const defaultCMS = {
         recentRelease: {
-            title: "DIFKI KHALIF — BELUM SELESAI",
-            videoId: "Zwc_1gSKLzM",
-            link: "https://www.youtube.com/watch?v=Zwc_1gSKLzM&list=RDZwc_1gSKLzM&start_radio=1"
+            title: "HANIN DHIYA — CINTA INI MEMBUNUHKU",
+            videoId: "8n-nAfpFQvc",
+            link: "https://www.youtube.com/watch?v=8n-nAfpFQvc&list=RD8n-nAfpFQvc&start_radio=1"
         },
         works: [
             { title: "BELUM SELESAI", artist: "DIFKI KHALIF", year: "2026", videoId: "Zwc_1gSKLzM", row: 1 },
@@ -1476,19 +1480,31 @@ function startSimbionApp() {
         const track = document.getElementById('film-track');
         if (!track) return;
         
-        // Use all works sorted by year
+        // Use all works sorted by year exactly matching V1
         const sortedWorks = [...cmsData.works].sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
         
         let gridHtml = '<div class="cinema-medias-grid" id="cinema-medias-grid">';
-        sortedWorks.forEach((item) => {
+        
+        // 1. Render original works with fixed cardNum (1..19)
+        sortedWorks.forEach((item, idx) => {
             gridHtml += `
-                <div class="gallery-item cms-gallery-item" data-title="${item.title.toUpperCase()}">
+                <div class="gallery-item cms-gallery-item" data-title="${item.title.toUpperCase()}" data-card-num="${idx + 1}">
                     <div class="gallery-item-inner block relative w-full h-full overflow-hidden rounded-sm group cursor-pointer bg-darkBg video-trigger border border-white/10 hover:border-simbionBlue/60 active:scale-95 transition-colors duration-150" data-video-id="${item.videoId}">
                         <img src="https://img.youtube.com/vi/${item.videoId}/maxresdefault.jpg" alt="${item.title}" class="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-200 ease-out">
                     </div>
                 </div>
             `;
         });
+
+        // 2. Hanin Dhiya — Cinta Ini Membunuhku (positioned cleanly to the left of ANTARA)
+        gridHtml += `
+            <div class="gallery-item cms-gallery-item gallery-item-hanin" data-title="CINTA INI MEMBUNUHKU" data-card-num="20">
+                <div class="gallery-item-inner block relative w-full h-full overflow-hidden rounded-sm group cursor-pointer bg-darkBg video-trigger border border-white/10 hover:border-simbionBlue/60 active:scale-95 transition-colors duration-150" data-video-id="8n-nAfpFQvc">
+                    <img src="https://img.youtube.com/vi/8n-nAfpFQvc/maxresdefault.jpg" alt="CINTA INI MEMBUNUHKU" class="w-full h-full object-cover opacity-85 group-hover:opacity-100 transition-opacity duration-200 ease-out">
+                </div>
+            </div>
+        `;
+
         gridHtml += '</div>';
 
         track.innerHTML = gridHtml;
@@ -3271,6 +3287,7 @@ function startSimbionApp() {
                 "PUTUSIN AKU DONG":     { xPercent: 65,  yPercent: 55 },  // geser ke KANAN BAWAH tegas
                 "TERJEBAK IMAJINASI":   { xPercent: -85, yPercent: 45 },  // geser ke KIRI lagi
                 "GELANG":               { xPercent: -25, yPercent: 35 },  // geser ke KIRI lagi
+                "CINTA INI MEMBUNUHKU": { xPercent: -10, yPercent: -25 }, // lebih dekat ke ANTARA dan posisinya lebih tinggi
                 "ANTARA":               { xPercent: 45,  yPercent: -35 }, // geser ke KANAN
                 "MERAYAKAN HARI INI":   { xPercent: 70,  yPercent: 65 },  // geser ke BAWAH
                 "SELALU UNTUK SELAMANYA": { xPercent: 10, yPercent: -15 }, // diletakkan tepat di antara Mak Comblang dan You're Mine
@@ -3287,7 +3304,7 @@ function startSimbionApp() {
 
             // 1. Organic, lively initial jitter + title-based manual adjustments
             allGalleryCards.forEach((card, idx) => {
-                const cardNum = idx + 1;
+                const cardNum = parseInt(card.getAttribute('data-card-num')) || (idx + 1);
                 const title = (card.getAttribute('data-title') || '').toUpperCase().trim();
                 const manual = titleOffsets[title] || { xPercent: 0, yPercent: 0 };
                 
@@ -3327,22 +3344,23 @@ function startSimbionApp() {
             // When cards are at Right Entry (100%+) or Left Exit (-15%), they dramatically expand/scatter UP & DOWN.
             // When cards enter Center Viewport (40%-60%), they converge/pinch tightly into their precise, elegant center composition.
             allGalleryCards.forEach((card, idx) => {
+                const cardNum = parseInt(card.getAttribute('data-card-num')) || (idx + 1);
                 const inner = card.querySelector('.gallery-item-inner') || card;
-                const rowModulo = idx % 3; // 0 = row 1 (top), 1 = row 2 (mid), 2 = row 3 (bottom)
+                const rowModulo = (cardNum - 1) % 3; // 0 = row 1 (top), 1 = row 2 (mid), 2 = row 3 (bottom)
                 
                 // Deterministic vertical expansion: top rows scatter UP (-), bottom rows scatter DOWN (+)
                 let rowDirection = -1; // row 1 scatters up
                 if (rowModulo === 1) {
-                    rowDirection = getPseudoRandom(idx + 1, 9.1) > 0 ? 0.7 : -0.7; // row 2 alternates
+                    rowDirection = getPseudoRandom(cardNum, 9.1) > 0 ? 0.7 : -0.7; // row 2 alternates
                 } else if (rowModulo === 2) {
                     rowDirection = 1; // row 3 scatters down
                 }
 
-                const enterY = (rowDirection * (120 + Math.abs(getPseudoRandom(idx + 1, 4.9)) * 140)); // up to ±260% vertical divergence
-                const exitY = (rowDirection * (130 + Math.abs(getPseudoRandom(idx + 1, 6.4)) * 150));
+                const enterY = (rowDirection * (120 + Math.abs(getPseudoRandom(cardNum, 4.9)) * 140)); // up to ±260% vertical divergence
+                const exitY = (rowDirection * (130 + Math.abs(getPseudoRandom(cardNum, 6.4)) * 150));
                 
-                const enterRot = getPseudoRandom(idx + 1, 3.7) * 45;
-                const exitRot = getPseudoRandom(idx + 1, 5.2) * 45;
+                const enterRot = getPseudoRandom(cardNum, 3.7) * 45;
+                const exitRot = getPseudoRandom(cardNum, 5.2) * 45;
                 const enterScale = 0.82;
                 const exitScale = 0.82;
 
@@ -3485,6 +3503,7 @@ function startSimbionApp() {
     initGalleryInteractions();
     initParagraphAnimations();
     if (window.ScrollTrigger) ScrollTrigger.refresh();
+                            if (window.lenis) window.lenis.start();
 
     if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(() => {
